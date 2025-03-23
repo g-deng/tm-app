@@ -1,4 +1,4 @@
-function TMContext({ id, states, deleteState, setTransitionFrom}) {
+function TMStateContext({ id, states, deleteState, setTransitionFrom}) {
     const rad = 20;
 
     const s = states.find((s) => s.id === id);
@@ -14,4 +14,4 @@ function TMContext({ id, states, deleteState, setTransitionFrom}) {
     );
 }
 
-export default TMContext;
+export default TMStateContext;

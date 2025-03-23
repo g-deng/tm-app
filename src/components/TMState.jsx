@@ -1,12 +1,17 @@
 function TMState({ 
-    s, active, setActive
+    s, active, setActive, trigger, setTrigger
  }) {
     const rad = 20;
 
     const onStateClick = (e, id) => {
         e.stopPropagation();
+
+        if (e.ctrlKey) {
+            const label = window.prompt('Enter new label');
+            if (label !== null && label !== '') s.label = label;
+        } 
+        setTrigger(!trigger);
         setActive(id);
-        console.log('hi');
     };
 
     const isActive = active === s.id;
@@ -22,7 +27,8 @@ function TMState({
             {(isActive && <circle key={'g'+s.id} cx={s.x} cy={s.y} r={rad+10} fill="url(#myGradient)"/>)}
             <circle key={s.id} cx={s.x} cy={s.y} r={rad} onClick={(e) => onStateClick(e, s.id)}
             fill='gray' stroke='black'/>
-            <text className='svgText' key={'t'+s.id} x={s.x-rad/2} y={s.y+5} textLength={rad} onClick={(e) => onStateClick(e, s.id)}>{s.label}</text>
+            <text className='svgText' key={'t'+s.id} x={s.x-rad/2} y={s.y+5} textLength={rad} 
+            onClick={(e) => onStateClick(e, s.id)}>{s.label}</text>
         </>
     );
 

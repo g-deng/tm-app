@@ -1,9 +1,16 @@
-function TMTransition({ t, states, active, setActive}) {
+function TMTransition({ t, states, active, setActive, trigger, setTrigger}) {
     const rad = 20;
     const strokeWidth = 3;
     
     const onTransitionClick = (e, id) => {
         e.stopPropagation();
+
+        if (e.ctrlKey) {
+            const label = window.prompt('Enter new label');
+            if (label !== null && label !== '') t.label = label;
+        } 
+        
+        setTrigger(!trigger);
         setActive(id);
         // window.alert(`clicked transition ${id}`);
     };
@@ -24,7 +31,8 @@ function TMTransition({ t, states, active, setActive}) {
             <line key={t.id} x1={fromState.x} x2={toState.x-distX*(rad+3*strokeWidth)/dist} 
             y1={fromState.y} y2={toState.y-distY*(rad+3*strokeWidth)/dist} 
             stroke="black" strokeWidth={strokeWidth} markerEnd="url(#arrow)"/>
-            <text className='svgText' key={'t'+t.id} x={fromState.x + distX/2} y={fromState.y+distY/2 - rad} onClick={(e) => onTransitionClick(e, t.id)}>{t.label}</text>
+            <text className='svgText' key={'t'+t.id} x={fromState.x + distX/2} y={fromState.y+distY/2 - rad} 
+            onClick={(e) => onTransitionClick(e, t.id)}>{t.label}</text>
         </>
     );
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import TMState from './TMState.jsx';
 import TMTransition from './TMTransition.jsx';
-import TMContext from './TMContext.jsx';
+import TMStateContext from './TMStateContext.jsx';
 
 const strokeWidth = 3;
 const rad = 20;
@@ -19,8 +19,9 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
   const newState = (x, y) => {
     const id = nextId;
     setNextId(nextId + 1);
-    const label = window.prompt('Enter label');
-    const newState = {id: id, x: x, y: y, label:`q${label}`};
+    let label = window.prompt('Enter label');
+    if (label == null || label === '') label = `q${id}`;
+    const newState = {id: id, x: x, y: y, label:label};
     setStates([...states, newState]);
     setActive(id);
   };
@@ -36,7 +37,8 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
     if (transitions.includes((item) => item.from === s && item.to === t)) return;
     const id = nextId;
     setNextId(nextId + 1);
-    const label = window.prompt('Enter label');
+    let label = window.prompt('Enter label');
+    if (label == null || label === '') label = 'ctrl + click to change';
     const newTransition = {id: id, from: s, to: t, label: label};
     setTransitions([...transitions, newTransition]);
     setActive(id);
@@ -68,15 +70,14 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
 
   const onMouseUp = (e) => {
     const { offsetX: x, offsetY: y } = e.nativeEvent;
+    const s = getStateByPosition(x,y);
     if (downState != null) {
       downState.x = x;
       downState.y = y;
     }
     // setMouseDown(null);
     setDownState(null);
-    if (transitionFrom != null) {
-      const s = getStateByPosition(x,y);
-      if (s != null)
+    if (transitionFrom != null && s != null) {
         newTransition(transitionFrom.id, s.id);
     }
     setTransitionFrom(null);
@@ -89,11 +90,11 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
   };
 
   const drawTransitions = transitions.map((t) => 
-    <TMTransition t={t} states={states} active={active} setActive={setActive}/>
+    <TMTransition t={t} states={states} active={active} setActive={setActive} trigger={trigger} setTrigger={setTrigger}/>
   );
 
   const drawStates = states.map((s) => 
-    <TMState s={s} active={active} setActive={setActive}/>
+    <TMState s={s} active={active} setActive={setActive} trigger={trigger} setTrigger={setTrigger}/>
   );
 
   const drawPreviewTransition = () => {
@@ -137,7 +138,7 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
       </marker>
       {drawTransitions}
       {drawStates}
-      {(active !== null) && <TMContext id={active} states={states} deleteState={deleteState} setTransitionFrom={setTransitionFrom}/>}
+      {(active !== null) && <TMStateContext id={active} states={states} deleteState={deleteState} setTransitionFrom={setTransitionFrom}/>}
       {drawPreviewTransition()}
     </svg>
   );
