@@ -1,5 +1,6 @@
 import './App.css';
 import BuildWindow from './components/BuildWindow.jsx';
+import SideBar from './components/SideBar.jsx';
 import { useState } from 'react';
 
 function App() {
@@ -10,16 +11,22 @@ function App() {
   const [transitions, setTransitions] = useState([
     { id: 2, from: 0, to: 1, label: "A/B; R"}
   ]);
+  const [mode, setMode] = useState('build');
+  const [undoStack, setUndoStack] = useState([{}]); // {action, type, item}
+  const [redoStack, setRedoStack] = useState([{}]);
 
   return (
     <div className="App">
       <header className="App-header">
         <p>
-          HIIIII
+          Turing Machine??? :o :D :p
         </p>
       </header>
       <div className="Window">
-        <BuildWindow key='window' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}/>
+        <BuildWindow key='window' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
+        undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack}/>
+        <SideBar key='sidebar' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
+        mode={mode} setMode={setMode} undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack}/>
       </div>
     </div>
   );

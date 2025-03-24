@@ -15,7 +15,7 @@
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
+  min-height: 10vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -42,4 +42,47 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.sidebar {
+  width: 200px;
+  height: 100vh; 
+  background-color: #728fab;
+  padding: 20px;
+  position: fixed; 
+  right: 0;
+  top: 0;
+}
+
+.sidebar-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #34495e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.sidebar-input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #b2cce7;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.sidebar-section {
+  padding: 10px;
+  height: 40vh;
+  width: 180px;
+  outline: 10px rgb(0, 0, 0);
 }

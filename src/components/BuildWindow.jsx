@@ -6,7 +6,7 @@ import TMStateContext from './TMStateContext.jsx';
 const strokeWidth = 3;
 const rad = 20;
 
-function BuildWindow({states, setStates, transitions, setTransitions}) {
+function BuildWindow({undoStack, setUndoStack, redoStack, setRedoStack, states, setStates, transitions, setTransitions}) {
   const [nextId, setNextId] = useState(3);
   const [active, setActive] = useState(null);
   // const [mouseDown, setMouseDown] = useState(null);
@@ -24,6 +24,8 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
     const newState = {id: id, x: x, y: y, label:label};
     setStates([...states, newState]);
     setActive(id);
+    console.log(undoStack);
+    setUndoStack([...undoStack, {action:'delete', type:'state', item:newState}]);
   };
 
   const newTransition = (s, t) => {
@@ -36,6 +38,7 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
     const newTransition = {id: id, from: s, to: t, label: label};
     setTransitions([...transitions, newTransition]);
     setActive(id);
+    setUndoStack([...undoStack, {action:'delete', type:'transition', item:newTransition}]);
   }
 
   const deleteItem = (id) => {
@@ -43,10 +46,14 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
     const s = states.find((s) => s.id === id);
     const t = transitions.find((t) => t.id === id);
     if (s != null) {
+      const removedTransitions = transitions.filter((item) => item.from === id || item.to === id);
       setTransitions(transitions.filter((item) => item.from !== id && item.to !== id));
-      setStates(states.filter((item) => item.id !== id));
+      setStates(states.filter((item) => item.id !== id));  
+      setUndoStack([...undoStack, 
+        {action:'create-multiple', state: s, transitions: removedTransitions}]);
     } else if (t != null) {
       setTransitions(transitions.filter((item) => item.id !== id));
+      setUndoStack([...undoStack, {action:'create', type:'transition', item:t}]);
     }
     setActive(null);
   }
