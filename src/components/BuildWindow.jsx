@@ -26,12 +26,6 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
     setActive(id);
   };
 
-  const deleteState = (id) => {
-    setTransitions(transitions.filter((item) => item.from !== id && item.to !== id));
-    setStates(states.filter((item) => item.id !== id));
-    setActive(null);
-  }
-
   const newTransition = (s, t) => {
     if (s === t) return;
     if (transitions.includes((item) => item.from === s && item.to === t)) return;
@@ -42,6 +36,19 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
     const newTransition = {id: id, from: s, to: t, label: label};
     setTransitions([...transitions, newTransition]);
     setActive(id);
+  }
+
+  const deleteItem = (id) => {
+    if (active == null) return;
+    const s = states.find((s) => s.id === id);
+    const t = transitions.find((t) => t.id === id);
+    if (s != null) {
+      setTransitions(transitions.filter((item) => item.from !== id && item.to !== id));
+      setStates(states.filter((item) => item.id !== id));
+    } else if (t != null) {
+      setTransitions(transitions.filter((item) => item.id !== id));
+    }
+    setActive(null);
   }
 
   const getStateByPosition = (x, y) => {
@@ -89,6 +96,12 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
     // setMouseDown(null);
   };
 
+  const onKeyDown = (e) => {
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      deleteItem(active);
+    }
+  }
+
   const drawTransitions = transitions.map((t) => 
     <TMTransition t={t} states={states} active={active} setActive={setActive} trigger={trigger} setTrigger={setTrigger}/>
   );
@@ -125,7 +138,9 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
     onMouseMove={onMouseMove}
     onMouseDown={onMouseDown}
     onMouseUp={onMouseUp}
-    onDoubleClick={(e) => onBuilderDoubleClick(e)}>
+    onDoubleClick={(e) => onBuilderDoubleClick(e)}
+    tabIndex='1'
+    onKeyDown={(e) => onKeyDown(e)}>
       <marker
         id="arrow"
         viewBox="0 0 10 10"
@@ -136,9 +151,10 @@ function BuildWindow({states, setStates, transitions, setTransitions}) {
         orient="auto-start-reverse">
         <path d="M 0 0 L 10 5 L 0 10 z" />
       </marker>
+      <rect x='0' y='0' width='100%' height='100%' stroke='black' strokeWidth='1' fillOpacity='0'/>
       {drawTransitions}
       {drawStates}
-      {(active !== null) && <TMStateContext id={active} states={states} deleteState={deleteState} setTransitionFrom={setTransitionFrom}/>}
+      {(active !== null) && <TMStateContext id={active} states={states} deleteState={deleteItem} setTransitionFrom={setTransitionFrom}/>}
       {drawPreviewTransition()}
     </svg>
   );
