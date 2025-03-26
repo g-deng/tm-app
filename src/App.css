@@ -67,6 +67,13 @@
   transition: background-color 0.3s;
 }
 
+.sidebar-btn:disabled,
+.sidebar-btn[disabled]{
+  border: 1px solid #34495e;
+  background-color: #59728b;
+  color: #34495e;
+}
+
 .sidebar-input {
   display: block;
   width: 100%;

@@ -12,8 +12,8 @@ function App() {
     { id: 2, from: 0, to: 1, label: "A/B; R"}
   ]);
   const [mode, setMode] = useState('build');
-  const [undoStack, setUndoStack] = useState([{}]); // {action, type, item}
-  const [redoStack, setRedoStack] = useState([{}]);
+  const [undoStack, setUndoStack] = useState([]); // {action, type, item}
+  const [redoStack, setRedoStack] = useState([]);
 
   return (
     <div className="App">

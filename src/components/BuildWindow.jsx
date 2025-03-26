@@ -24,8 +24,8 @@ function BuildWindow({undoStack, setUndoStack, redoStack, setRedoStack, states, 
     const newState = {id: id, x: x, y: y, label:label};
     setStates([...states, newState]);
     setActive(id);
-    console.log(undoStack);
     setUndoStack([...undoStack, {action:'delete', type:'state', item:newState}]);
+    setRedoStack([]);
   };
 
   const newTransition = (s, t) => {
@@ -39,6 +39,7 @@ function BuildWindow({undoStack, setUndoStack, redoStack, setRedoStack, states, 
     setTransitions([...transitions, newTransition]);
     setActive(id);
     setUndoStack([...undoStack, {action:'delete', type:'transition', item:newTransition}]);
+    setRedoStack([]);
   }
 
   const deleteItem = (id) => {
@@ -55,6 +56,7 @@ function BuildWindow({undoStack, setUndoStack, redoStack, setRedoStack, states, 
       setTransitions(transitions.filter((item) => item.id !== id));
       setUndoStack([...undoStack, {action:'create', type:'transition', item:t}]);
     }
+    setRedoStack([]);
     setActive(null);
   }
 

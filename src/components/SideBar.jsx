@@ -5,21 +5,19 @@ function SideBar({ mode, setMode, undoStack, setUndoStack, redoStack, setRedoSta
         if (mode !== 'build') return;
         const elem = undoStack.pop();
         console.log(elem);
-        console.log(undoStack);
-        console.log(redoStack);
         if (elem == null || elem.action == null) return;
         switch (elem.action) {
             case 'delete':
                 if (elem.type === 'state') {
                     setStates(states.filter(item => item.id !== elem.item.id));
                 } else if (elem.type === 'transition') {
-                    setStates(transitions.filter(item => item.id !== elem.item.id));
+                    setTransitions(transitions.filter(item => item.id !== elem.item.id));
                 }
                 elem.action = 'create';
-                setRedoStack([...redoStack, elem]);   
+                setRedoStack([...redoStack, elem]);
                 break;
             case 'create':
-                if (elem.type === 'state') {
+                if (elem.type === 'state' && states.find((s)=>s.id === elem.item.id) == null) {
                     setStates([...states, elem.item]);
                 } else if (elem.type === 'transition') {
                     setTransitions([...transitions, elem.item]);
@@ -55,17 +53,15 @@ function SideBar({ mode, setMode, undoStack, setUndoStack, redoStack, setRedoSta
         if (mode !== 'build') return;
         const elem = redoStack.pop();
         console.log(elem);
-        console.log(undoStack);
-        console.log(redoStack);
         if (elem == null || elem.action == null) return;
         switch (elem.action) {
             case 'delete':
                 if (elem.type === 'state') {
                     setStates(states.filter(item => item.id !== elem.item.id));
                 } else if (elem.type === 'transition') {
-                    setStates(transitions.filter(item => item.id !== elem.item.id));
+                    setTransitions(transitions.filter(item => item.id !== elem.item.id));
                 }
-                elem.type = 'create';
+                elem.action = 'create';
                 setUndoStack([...undoStack, elem]);   
                 break;
             case 'create':
@@ -74,7 +70,7 @@ function SideBar({ mode, setMode, undoStack, setUndoStack, redoStack, setRedoSta
                 } else if (elem.type === 'transition') {
                     setTransitions([...transitions, elem.item]);
                 }
-                elem.type = 'delete';
+                elem.action = 'delete';
                 setUndoStack([...undoStack, elem]);  
                 break;
             case 'edit':
@@ -91,6 +87,7 @@ function SideBar({ mode, setMode, undoStack, setUndoStack, redoStack, setRedoSta
                 break;
             case 'delete-multiple':
                 setStates(states.filter(item => item.id !== elem.state.id));
+                if (elem.transitions != null && elem.transitions.length > 0)
                 setTransitions(transitions.filter(item => elem.transitions.find((t)=>t.id===item.id) != null));
                 elem.action = 'create-multiple';
                 setUndoStack([...undoStack, elem]);  
@@ -108,8 +105,8 @@ function SideBar({ mode, setMode, undoStack, setUndoStack, redoStack, setRedoSta
                 onMouseDown={()=>setMode('build')}
             >
                 build
-               <button className='sidebar-btn' title='Undo' onClick={onUndo}>Undo</button>
-               <button className='sidebar-btn' title='Redo' onClick={onRedo}>Redo</button>
+               <button className='sidebar-btn' title='Undo' onClick={onUndo} disabled={undoStack.length <= 0}>Undo</button>
+               <button className='sidebar-btn' title='Redo' onClick={onRedo} disabled={redoStack.length <= 0}>Redo</button>
             </div>
             
             <div 

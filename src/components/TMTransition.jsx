@@ -17,6 +17,7 @@ function TMTransition({ t, states, active, setActive, trigger, setTrigger}) {
 
     const fromState = states.find((s) => s.id === t.from);
     const toState = states.find((s) => s.id === t.to);
+    if (fromState == null || toState == null) return <></>;
     const distX = (toState.x - fromState.x);
     const distY = (toState.y - fromState.y);
     const dist = Math.sqrt(Math.pow(distX,2) + Math.pow(distY,2));
