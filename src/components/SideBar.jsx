@@ -1,5 +1,9 @@
+import { useState } from 'react';
 
-function SideBar({ mode, setMode, undoStack, setUndoStack, redoStack, setRedoStack, states, setStates, transitions, setTransitions }) {
+function SideBar({ 
+    mode, setMode, undoStack, setUndoStack, redoStack, setRedoStack,
+    states, setStates, transitions, setTransitions, testState, setTestState}) {
+    const [status, setStatus] = useState('Testing information not entered');
 
     const onUndo = () => {
         if (mode !== 'build') return;
@@ -98,6 +102,22 @@ function SideBar({ mode, setMode, undoStack, setUndoStack, redoStack, setRedoSta
         setRedoStack(redoStack);
     };
 
+    const onSubmit = (data) => {
+        setTestState({stateId:0, tape:data.get('input-tape'), pointer:0, step:0, maxStep:data.get('maxStep')})
+        setStatus('Testing data set');
+    };
+
+    const onStep = () => {
+        const c = testState.tape.charAt(testState.pointer);
+        const t = transitions.find((t)=>t.from === testState.stateId && t.label.charAt(0) === c);
+        if (t == null) {
+            setStatus(`Rejected at state ${testState.stateId} (no valid transition)`);
+            return;
+        }
+        setTestState({stateId:t.to, tape:testState.tape, pointer:testState.pointer+1, step:testState.step+1, maxStep:testState.maxStep});
+        setStatus(`Finished step ${testState.step} at state ${testState.stateId}`);
+    };
+
     return (
         <div className='sidebar'>
             <div 
@@ -114,14 +134,23 @@ function SideBar({ mode, setMode, undoStack, setUndoStack, redoStack, setRedoSta
                 onMouseDown={()=>setMode('test')}
             >
                 test
-                <form>
+                <form action={onSubmit}>
                     <label>
                         Limit steps:
-                        <input className='sidebar-input' type='integer' defaultValue='10'/>
+                        <input className='sidebar-input' name='max-steps' type='integer' defaultValue='10'/>
+                    </label>
+                    <label>
+                        Input tape:
+                        <input className='sidebar-input' name='input-tape' type='string' defaultValue='ABA'/>
+                    </label>
+                    <label>
+                        Save test params:
+                        <input className='sidebar-btn' type='submit'/>
                     </label>
                 </form>
-                <button className='sidebar-btn' title='Step'>Step</button>
+                <button className='sidebar-btn' title='Step' onClick={onStep}>Step</button>
                 <button className='sidebar-btn' title='Fast forward'>Fast forward</button>
+                Status: {status}
             </div>
         </div>
     );

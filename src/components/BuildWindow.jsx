@@ -44,6 +44,10 @@ function BuildWindow({undoStack, setUndoStack, redoStack, setRedoStack, states, 
 
   const deleteItem = (id) => {
     if (active == null) return;
+    if (id === 0) {
+      window.alert('Not allowed to delete initial state!');
+      return;
+    }
     const s = states.find((s) => s.id === id);
     const t = transitions.find((t) => t.id === id);
     if (s != null) {

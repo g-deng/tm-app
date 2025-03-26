@@ -14,6 +14,7 @@ function App() {
   const [mode, setMode] = useState('build');
   const [undoStack, setUndoStack] = useState([]); // {action, type, item}
   const [redoStack, setRedoStack] = useState([]);
+  const [testState, setTestState] = useState({}); // {stateId, tape, pointer, step, maxStep}
 
   return (
     <div className="App">
@@ -26,7 +27,8 @@ function App() {
         <BuildWindow key='window' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
         undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack}/>
         <SideBar key='sidebar' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
-        mode={mode} setMode={setMode} undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack}/>
+        mode={mode} setMode={setMode} undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack}
+        testState={testState} setTestState={setTestState}/>
       </div>
     </div>
   );
