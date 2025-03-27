@@ -15,7 +15,7 @@ function App() {
   const [mode, setMode] = useState('build');
   const [undoStack, setUndoStack] = useState([]); // {action, type, item}
   const [redoStack, setRedoStack] = useState([]);
-  const [testState, setTestState] = useState({}); // {stateId, tape, pointer, step, maxStep}
+  const [testState, setTestState] = useState(null); // {stateId, tape, pointer, step, maxStep}
 
   return (
     <div className="App">

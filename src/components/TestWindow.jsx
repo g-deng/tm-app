@@ -6,7 +6,7 @@ function TestWindow({
   states, transitions, testState, 
 }) {
   const [trigger, setTrigger] = useState(false);
-  const active = testState.stateId;
+  const active = (testState) ? testState.stateId : null;
 
   const drawTransitions = transitions.map((t) => 
     <TMTransition t={t} states={states} active={active} trigger={trigger} setTrigger={setTrigger}/>

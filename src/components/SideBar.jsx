@@ -5,9 +5,9 @@ function SideBar({
     states, setStates, transitions, setTransitions, testState, setTestState}) {
     const [status, setStatus] = useState('Testing information not entered');
 
-    const onUndo = () => {
+    const undoRedoStacker = (fromStack, setFromStack, toStack, setToStack) => {
         if (mode !== 'build') return;
-        const elem = undoStack.pop();
+        const elem = fromStack.pop();
         console.log(elem);
         if (elem == null || elem.action == null) return;
         switch (elem.action) {
@@ -18,7 +18,6 @@ function SideBar({
                     setTransitions(transitions.filter(item => item.id !== elem.item.id));
                 }
                 elem.action = 'create';
-                setRedoStack([...redoStack, elem]);
                 break;
             case 'create':
                 if (elem.type === 'state' && states.find((s)=>s.id === elem.item.id) == null) {
@@ -27,7 +26,6 @@ function SideBar({
                     setTransitions([...transitions, elem.item]);
                 }
                 elem.action = 'delete';
-                setRedoStack([...redoStack, elem]);  
                 break;
             case 'edit':
                 let original;
@@ -39,67 +37,30 @@ function SideBar({
                     setTransitions([...transitions.filter((item) => item.id !== elem.item.id), elem.item]);
                 }
                 elem.item = original;
-                setRedoStack([...redoStack, elem])
                 break;
             case 'create-multiple':
                 setStates([...states, elem.state]);
                 setTransitions([...transitions, ...elem.transitions]);
                 elem.action = 'delete-multiple';
-                setRedoStack([...redoStack, elem]);  
-                break;
-            default:
-                break;
-        };
-        setUndoStack(undoStack);
-    };
-
-    const onRedo = () => {
-        if (mode !== 'build') return;
-        const elem = redoStack.pop();
-        console.log(elem);
-        if (elem == null || elem.action == null) return;
-        switch (elem.action) {
-            case 'delete':
-                if (elem.type === 'state') {
-                    setStates(states.filter(item => item.id !== elem.item.id));
-                } else if (elem.type === 'transition') {
-                    setTransitions(transitions.filter(item => item.id !== elem.item.id));
-                }
-                elem.action = 'create';
-                setUndoStack([...undoStack, elem]);   
-                break;
-            case 'create':
-                if (elem.type === 'state') {
-                    setStates([...states, elem.item]);
-                } else if (elem.type === 'transition') {
-                    setTransitions([...transitions, elem.item]);
-                }
-                elem.action = 'delete';
-                setUndoStack([...undoStack, elem]);  
-                break;
-            case 'edit':
-                let original;
-                if (elem.type === 'state') {
-                    original = states.find((item) => item.id === elem.item.id);
-                    setStates([...states.filter((item) => item.id !== elem.item.id), elem.item]);
-                } else if (elem.type === 'transition') {
-                    original = transitions.find((item) => item.id === elem.item.id);
-                    setTransitions([...transitions.filter((item) => item.id !== elem.item.id), elem.item]);
-                }
-                elem.item = original;
-                setUndoStack([...undoStack, elem])
                 break;
             case 'delete-multiple':
                 setStates(states.filter(item => item.id !== elem.state.id));
                 if (elem.transitions != null && elem.transitions.length > 0)
                 setTransitions(transitions.filter(item => elem.transitions.find((t)=>t.id===item.id) != null));
                 elem.action = 'create-multiple';
-                setUndoStack([...undoStack, elem]);  
                 break;
             default:
                 break;
         };
-        setRedoStack(redoStack);
+        setToStack([...toStack, elem]);
+        setFromStack(fromStack);
+    }
+    const onUndo = () => {
+        undoRedoStacker(undoStack, setUndoStack, redoStack, setRedoStack);
+    };
+
+    const onRedo = () => {
+        undoRedoStacker(redoStack, setRedoStack, undoStack, setUndoStack);
     };
 
     const onSubmit = (data) => {
@@ -147,8 +108,8 @@ function SideBar({
                         <input className='sidebar-btn' type='submit'/>
                     </label>
                 </form>
-                <button className='sidebar-btn' title='Step' onClick={onStep}>Step</button>
-                <button className='sidebar-btn' title='Fast forward'>Fast forward</button>
+                <button className='sidebar-btn' title='Step' onClick={onStep} disabled={testState == null}>Step</button>
+                <button className='sidebar-btn' title='Fast forward' disabled={testState == null}>Fast forward</button>
                 Status: {status}
             </div>
         </div>
