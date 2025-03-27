@@ -1,9 +1,11 @@
-function TMTransition({ t, states, active, setActive, trigger, setTrigger}) {
+function TMTransition({ t, states, active, setActive, trigger, setTrigger, clickable}) {
     const rad = 20;
     const strokeWidth = 3;
     
     const onTransitionClick = (e, id) => {
+        
         e.stopPropagation();
+        if (!clickable) return;
 
         if (e.ctrlKey) {
             const label = window.prompt('Enter new label');

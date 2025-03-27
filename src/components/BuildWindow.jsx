@@ -6,7 +6,9 @@ import TMStateContext from './TMStateContext.jsx';
 const strokeWidth = 3;
 const rad = 20;
 
-function BuildWindow({undoStack, setUndoStack, redoStack, setRedoStack, states, setStates, transitions, setTransitions}) {
+function BuildWindow({
+  undoStack, setUndoStack, setRedoStack, states, setStates, transitions, setTransitions
+}) {
   const [nextId, setNextId] = useState(3);
   const [active, setActive] = useState(null);
   // const [mouseDown, setMouseDown] = useState(null);
@@ -116,11 +118,11 @@ function BuildWindow({undoStack, setUndoStack, redoStack, setRedoStack, states, 
   }
 
   const drawTransitions = transitions.map((t) => 
-    <TMTransition t={t} states={states} active={active} setActive={setActive} trigger={trigger} setTrigger={setTrigger}/>
+    <TMTransition t={t} states={states} active={active} setActive={setActive} trigger={trigger} setTrigger={setTrigger} clickable='true'/>
   );
 
   const drawStates = states.map((s) => 
-    <TMState s={s} active={active} setActive={setActive} trigger={trigger} setTrigger={setTrigger}/>
+    <TMState s={s} active={active} setActive={setActive} trigger={trigger} setTrigger={setTrigger} clickable='true'/>
   );
 
   const drawPreviewTransition = () => {

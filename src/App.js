@@ -1,5 +1,6 @@
 import './App.css';
 import BuildWindow from './components/BuildWindow.jsx';
+import TestWindow from './components/TestWindow.jsx';
 import SideBar from './components/SideBar.jsx';
 import { useState } from 'react';
 
@@ -24,12 +25,13 @@ function App() {
         </p>
       </header>
       <div className="Window">
-        <BuildWindow key='window' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
-        undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack}/>
-        <SideBar key='sidebar' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
+        {(mode === "build") && <BuildWindow key='window' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
+        undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack} testState={testState}/>}
+        {(mode === "test") && <TestWindow states={states} transitions={transitions} testState={testState}/>}
+      </div>
+      <SideBar key='sidebar' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
         mode={mode} setMode={setMode} undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack}
         testState={testState} setTestState={setTestState}/>
-      </div>
     </div>
   );
 }

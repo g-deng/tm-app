@@ -1,9 +1,11 @@
 function TMState({ 
-    s, active, setActive, trigger, setTrigger
+    s, active, setActive, trigger, setTrigger, clickable
  }) {
     const rad = 20;
 
     const onStateClick = (e, id) => {
+        if (!clickable) return;
+        
         e.stopPropagation();
 
         if (e.ctrlKey) {

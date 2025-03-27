@@ -121,16 +121,15 @@ function SideBar({
     return (
         <div className='sidebar'>
             <div 
-                className='sidebar-section'
-                onMouseDown={()=>setMode('build')}
+                className={'sidebar-section' + ((mode === 'build') ? ' sidebar-active' : '')}
+                onMouseDown={()=>{setMode('build')}}
             >
                 build
                <button className='sidebar-btn' title='Undo' onClick={onUndo} disabled={undoStack.length <= 0}>Undo</button>
                <button className='sidebar-btn' title='Redo' onClick={onRedo} disabled={redoStack.length <= 0}>Redo</button>
             </div>
-            
             <div 
-                className='sidebar-section'
+                className={'sidebar-section' + ((mode === 'test') ? ' sidebar-active' : '')}
                 onMouseDown={()=>setMode('test')}
             >
                 test
