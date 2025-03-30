@@ -95,10 +95,17 @@
   height: 40vh;
   width: 180px;
   border: 10px rgb(0, 0, 0);
-  background-color: #9db1c6;
+  background-color: #8198af;
   border-radius: 8px;
 }
 
 .sidebar-active {
-  background-color: #496d93;
+  background-color: #9db1c6;
+  border-color: #f1f6fc;
+}
+
+.tape-container {
+  width: 500px;
+  overflow: auto;
+  border: 1px solid #ccc;
 }

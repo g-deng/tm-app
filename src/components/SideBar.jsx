@@ -64,7 +64,7 @@ function SideBar({
     };
 
     const onSubmit = (data) => {
-        setTestState({stateId:0, tape:data.get('input-tape'), pointer:0, step:0, maxStep:data.get('maxStep')})
+        setTestState({stateId:0, tape:data.get('input-tape'), pointer:0, step:0, maxStep:data.get('max-steps')})
         setStatus('Testing data set');
     };
 
@@ -77,6 +77,32 @@ function SideBar({
         }
         setTestState({stateId:t.to, tape:testState.tape, pointer:testState.pointer+1, step:testState.step+1, maxStep:testState.maxStep});
         setStatus(`Finished step ${testState.step} at state ${testState.stateId}`);
+    };
+
+    const onFastForward = () => {
+        console.log('start fast forward');
+        console.log(testState);
+        let pointer = testState.pointer;
+        let stateId = testState.stateId;
+        let step = testState.step;
+        for (let i = step; i < testState.maxStep; i++) {
+            const thisId = stateId;
+            const c = testState.tape.charAt(pointer);
+            const t = transitions.find((t)=>t.from === thisId && t.label.charAt(0) === c);
+            if (t == null) {
+                setStatus(`Rejected at state ${stateId} after (no valid transition)`);
+                break;
+            }
+            stateId = t.to;
+            pointer += 1;
+            step += 1;
+        }
+        testState.stateId = stateId;
+        testState.pointer = pointer;
+        testState.step = step;
+        setTestState(testState);
+        console.log('done with fast forward');
+        console.log(testState);
     };
 
     return (
@@ -109,7 +135,7 @@ function SideBar({
                     </label>
                 </form>
                 <button className='sidebar-btn' title='Step' onClick={onStep} disabled={testState == null}>Step</button>
-                <button className='sidebar-btn' title='Fast forward' disabled={testState == null}>Fast forward</button>
+                <button className='sidebar-btn' title='Fast forward' onClick={onFastForward} disabled={testState == null}>Fast forward</button>
                 Status: {status}
             </div>
         </div>

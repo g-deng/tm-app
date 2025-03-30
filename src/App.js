@@ -2,6 +2,7 @@ import './App.css';
 import BuildWindow from './components/BuildWindow.jsx';
 import TestWindow from './components/TestWindow.jsx';
 import SideBar from './components/SideBar.jsx';
+import Tape from './components/Tape.jsx';
 import { useState } from 'react';
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
       <SideBar key='sidebar' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
         mode={mode} setMode={setMode} undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack}
         testState={testState} setTestState={setTestState}/>
+      <Tape states={states} testState={testState}/>
     </div>
   );
 }
