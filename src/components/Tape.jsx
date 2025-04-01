@@ -1,5 +1,5 @@
 function Tape({ states, testState }) {
-    const inputArray = (testState) ? testState.tape.split("") : [];
+    const inputArray = (testState) ? testState.tape : [];
     const extraArray = [...Array(Math.max(20 - inputArray.length, 3))];
     const tapeArray = inputArray.concat(extraArray);
     tapeArray.unshift(' ', ' ', ' ');

@@ -35,9 +35,22 @@ function BuildWindow({
     if (transitions.includes((item) => item.from === s && item.to === t)) return;
     const id = nextId;
     setNextId(nextId + 1);
-    let label = window.prompt('Enter label');
-    if (label == null || label === '') label = 'ctrl + click to change';
-    const newTransition = {id: id, from: s, to: t, label: label};
+    const newTransition = {id: id, from: s, to: t};
+    while (true) {
+      let input = window.prompt('Enter new label');
+      if (input == null || input === '') continue;
+      input = input.replace(/\s/g, "");
+      const regex = new RegExp(/(?<read>(?:[^,],)*[^,])(?:\/(?<write>[^,]))?;(?<move>[LR])/);
+      const matches = input.match(regex);
+      if (regex.test(input) && matches.groups.read && matches.groups.move) {
+        newTransition.read = matches.groups.read.split(",");
+        newTransition.write = matches.groups.write;
+        newTransition.move = matches.groups.move;
+        break;
+      }
+      window.alert("Doesn't match format: A/B;R or A,B,C/D;L or A;R");
+    }
+    
     setTransitions([...transitions, newTransition]);
     setActive(id);
     setUndoStack([...undoStack, {action:'delete', type:'transition', item:newTransition}]);

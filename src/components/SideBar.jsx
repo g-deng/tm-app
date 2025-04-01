@@ -64,18 +64,28 @@ function SideBar({
     };
 
     const onSubmit = (data) => {
-        setTestState({stateId:0, tape:data.get('input-tape'), pointer:0, step:0, maxStep:data.get('max-steps')})
-        setStatus('Testing data set');
+        setTestState({stateId:0, tape:data.get("input-tape").split(""), pointer:0, step:0, maxStep:data.get("max-steps")})
+        setStatus("Testing data set");
     };
 
     const onStep = () => {
-        const c = testState.tape.charAt(testState.pointer);
-        const t = transitions.find((t)=>t.from === testState.stateId && t.label.charAt(0) === c);
+        const c = testState.tape[testState.pointer];
+        const t = transitions.find((t)=>t.from === testState.stateId && t.read.includes(c));
         if (t == null) {
             setStatus(`Rejected at state ${testState.stateId} (no valid transition)`);
             return;
         }
-        setTestState({stateId:t.to, tape:testState.tape, pointer:testState.pointer+1, step:testState.step+1, maxStep:testState.maxStep});
+        if (t.write !== null) {
+            testState.tape[testState.pointer] = t.write;
+        }
+        let newPointer = testState.pointer;
+        if (t.move === 'R') {
+            newPointer += 1;
+        } else {
+            newPointer -= 1;
+        }
+
+        setTestState({stateId:t.to, tape:testState.tape, pointer:newPointer, step:testState.step+1, maxStep:testState.maxStep});
         setStatus(`Finished step ${testState.step} at state ${testState.stateId}`);
     };
 
