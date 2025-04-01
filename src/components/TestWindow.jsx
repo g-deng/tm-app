@@ -21,7 +21,7 @@ function TestWindow({
   }
 
   return (
-    <svg key='windowFrame' width="500" height="500" xmlns="http://www.w3.org/2000/svg"
+    <svg key='windowFrame' className='window' xmlns="http://www.w3.org/2000/svg"
         onClick={onClick}
     >
       <marker

@@ -11,7 +11,7 @@ function App() {
     { id: 1, x: 200, y: 200, label: "q1"}
   ]);
   const [transitions, setTransitions] = useState([
-    { id: 2, from: 0, to: 1, label: "A/B; R"}
+    { id: 2, from: 0, to: 1, read:["A"], write:"B", move:"R"}
   ]);
   const [mode, setMode] = useState('build');
   const [undoStack, setUndoStack] = useState([]); // {action, type, item}

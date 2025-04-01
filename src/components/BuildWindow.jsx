@@ -107,7 +107,8 @@ function BuildWindow({
 
   const onBuilderDoubleClick = (e) => {
     const { offsetX: x, offsetY: y } = e.nativeEvent;
-    newState(x,y);
+    if (getStateByPosition(x, y) == null)
+      newState(x,y);
     // setMouseDown(null);
   };
 
@@ -149,29 +150,31 @@ function BuildWindow({
   };
 
   return (
-    <svg key='windowFrame' width="500" height="500" xmlns="http://www.w3.org/2000/svg"
-    onMouseMove={onMouseMove}
-    onMouseDown={onMouseDown}
-    onMouseUp={onMouseUp}
-    onDoubleClick={(e) => onBuilderDoubleClick(e)}
-    tabIndex='1'
-    onKeyDown={(e) => onKeyDown(e)}>
-      <marker
-        id="arrow"
-        viewBox="0 0 10 10"
-        refX="5"
-        refY="5"
-        markerWidth="6"
-        markerHeight="6"
-        orient="auto-start-reverse">
-        <path d="M 0 0 L 10 5 L 0 10 z" />
-      </marker>
-      <rect x='0' y='0' width='100%' height='100%' stroke='black' strokeWidth='1' fillOpacity='0'/>
-      {drawTransitions}
-      {drawStates}
-      {(active !== null) && <TMStateContext id={active} states={states} deleteState={deleteItem} setTransitionFrom={setTransitionFrom}/>}
-      {drawPreviewTransition()}
-    </svg>
+    <div className='window-container'>
+      <svg key='windowFrame' className='window' xmlns="http://www.w3.org/2000/svg"
+      onMouseMove={onMouseMove}
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
+      onDoubleClick={(e) => onBuilderDoubleClick(e)}
+      tabIndex='1'
+      onKeyDown={(e) => onKeyDown(e)}>
+        <marker
+          id="arrow"
+          viewBox="0 0 10 10"
+          refX="5"
+          refY="5"
+          markerWidth="6"
+          markerHeight="6"
+          orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" />
+        </marker>
+        <rect x='0' y='0' width='100%' height='100%' stroke='black' strokeWidth='1' fillOpacity='0'/>
+        {drawTransitions}
+        {drawStates}
+        {(active !== null) && <TMStateContext id={active} states={states} deleteState={deleteItem} setTransitionFrom={setTransitionFrom}/>}
+        {drawPreviewTransition()}
+      </svg>
+    </div>
   );
 }
 

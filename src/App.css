@@ -44,6 +44,19 @@
   user-select: none;
 }
 
+.window-container {
+  position: absolute;
+  left: 0px;
+}
+
+.window {
+  width: 700px;
+  height: 500px;
+  position: relative;
+  top: 10px;
+  left: 100px;
+}
+
 .sidebar {
   width: 200px;
   height: 100vh; 
@@ -90,10 +103,10 @@
 }
 
 .sidebar-section {
+  margin: auto;
   padding: 10px;
-  margin-bottom: 10px;
   height: 40vh;
-  width: 180px;
+  width: 80%;
   border: 10px rgb(0, 0, 0);
   background-color: #8198af;
   border-radius: 8px;
@@ -108,4 +121,12 @@
   width: 500px;
   overflow: auto;
   border: 1px solid #ccc;
+}
+
+.mini-input {
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  border-radius: 2px;
 }

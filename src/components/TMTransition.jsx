@@ -8,8 +8,20 @@ function TMTransition({ t, states, active, setActive, trigger, setTrigger, click
         if (!clickable) return;
 
         if (e.ctrlKey) {
-            const label = window.prompt('Enter new label');
-            if (label !== null && label !== '') t.label = label;
+            let input = window.prompt('Enter new label');
+            if (input == null || input === '') return;
+
+            input = input.replace(/\s/g, "");
+            const regex = new RegExp(/(?<read>(?:[^,],)*[^,])(?:\/(?<write>[^,]))?;(?<move>[LR])/);
+            const matches = input.match(regex);
+            if (!regex.test(input) || !matches.groups.read || !matches.groups.write || !matches.groups.move) {
+                window.alert("Doesn't match format: A/B;R or A,B,C/D;L");
+                return;
+            }
+            t.read = matches.groups.read.split(",");
+            t.write = matches.groups.write;
+            t.move = matches.groups.move;
+            console.log(t);
         } 
         
         setTrigger(!trigger);
@@ -35,7 +47,7 @@ function TMTransition({ t, states, active, setActive, trigger, setTrigger, click
             y1={fromState.y} y2={toState.y-distY*(rad+3*strokeWidth)/dist}  onClick={(e) => onTransitionClick(e, t.id)}
             stroke="black" strokeWidth={strokeWidth} markerEnd="url(#arrow)"/>
             <text className='svgText' key={'t'+t.id} x={fromState.x + distX/2} y={fromState.y+distY/2 - rad} 
-            onClick={(e) => onTransitionClick(e, t.id)}>{t.label}</text>
+            onClick={(e) => onTransitionClick(e, t.id)}>{t.read + "/" + t.write + ";" + t.move}</text>
         </>
     );
 }
