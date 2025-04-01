@@ -21,7 +21,7 @@ function BuildWindow({
   const newState = (x, y) => {
     const id = nextId;
     setNextId(nextId + 1);
-    let label = window.prompt('Enter label');
+    let label = null; // window.prompt('Enter label');
     if (label == null || label === '') label = `q${id}`;
     const newState = {id: id, x: x, y: y, label:label};
     setStates([...states, newState]);

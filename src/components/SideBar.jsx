@@ -4,6 +4,8 @@ function SideBar({
     mode, setMode, undoStack, setUndoStack, redoStack, setRedoStack,
     states, setStates, transitions, setTransitions, testState, setTestState}) {
     const [status, setStatus] = useState('Testing information not entered');
+    const [lastInputTape, setLastInputTape] = useState("ABA");
+    const [lastMaxSteps, setLastMaxSteps] = useState(10);
 
     const undoRedoStacker = (fromStack, setFromStack, toStack, setToStack) => {
         if (mode !== 'build') return;
@@ -65,6 +67,8 @@ function SideBar({
 
     const onSubmit = (data) => {
         setTestState({stateId:0, tape:data.get("input-tape").split(""), pointer:0, step:0, maxStep:data.get("max-steps")})
+        setLastInputTape(data.get("input-tape"));
+        setLastMaxSteps(data.get("max-steps"));
         setStatus("Testing data set");
     };
 
@@ -75,7 +79,7 @@ function SideBar({
             setStatus(`Rejected at state ${testState.stateId} (no valid transition)`);
             return;
         }
-        if (t.write !== null) {
+        if (t.write != null && t.write !== "") {
             testState.tape[testState.pointer] = t.write;
         }
         let newPointer = testState.pointer;
@@ -119,7 +123,7 @@ function SideBar({
         <div className='sidebar'>
             <div 
                 className={'sidebar-section' + ((mode === 'build') ? ' sidebar-active' : '')}
-                onMouseDown={()=>{setMode('build')}}
+                onMouseDown={()=>{setMode('build'); setTestState(null)}}
             >
                 build
                <button className='sidebar-btn' title='Undo' onClick={onUndo} disabled={undoStack.length <= 0}>Undo</button>
@@ -133,11 +137,11 @@ function SideBar({
                 <form action={onSubmit}>
                     <label>
                         Limit steps:
-                        <input className='sidebar-input' name='max-steps' type='integer' defaultValue='10'/>
+                        <input className='sidebar-input' name='max-steps' type='integer' defaultValue={lastMaxSteps}/>
                     </label>
                     <label>
                         Input tape:
-                        <input className='sidebar-input' name='input-tape' type='string' defaultValue='ABA'/>
+                        <input className='sidebar-input' name='input-tape' type='string' defaultValue={lastInputTape}/>
                     </label>
                     <label>
                         Save test params:
