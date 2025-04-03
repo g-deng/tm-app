@@ -11,7 +11,7 @@ function App() {
     { id: 1, x: 200, y: 200, label: "q1"}
   ]);
   const [transitions, setTransitions] = useState([
-    { id: 2, from: 0, to: 1, read:["A"], write:"B", move:"R"}
+    { id: 2, from: 0, to: 1, read:["A"], write:"B", move:"R", curveX: 0, curveY: -30}
   ]);
   const [mode, setMode] = useState('build');
   const [undoStack, setUndoStack] = useState([]); // {action, type, item}
@@ -25,15 +25,17 @@ function App() {
           Turing Machine??? :o :D :p
         </p>
       </header>
-      <div className="Window">
-        {(mode === "build") && <BuildWindow key='window' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
-        undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack} testState={testState}/>}
-        {(mode === "test") && <TestWindow states={states} transitions={transitions} testState={testState}/>}
+      <div className="content-container">
+        <div className="window-container">
+          {(mode === "build") && <BuildWindow key='window' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
+          undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack} testState={testState}/>}
+          {(mode === "test") && <TestWindow states={states} transitions={transitions} testState={testState}/>}
+          <Tape states={states} testState={testState}/>
+        </div>
+        <SideBar key='sidebar' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
+          mode={mode} setMode={setMode} undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack}
+          testState={testState} setTestState={setTestState}/>
       </div>
-      <SideBar key='sidebar' states={states} setStates={setStates} transitions={transitions} setTransitions={setTransitions}
-        mode={mode} setMode={setMode} undoStack={undoStack} setUndoStack={setUndoStack} redoStack={redoStack} setRedoStack={setRedoStack}
-        testState={testState} setTestState={setTestState}/>
-      <Tape states={states} testState={testState}/>
     </div>
   );
 }

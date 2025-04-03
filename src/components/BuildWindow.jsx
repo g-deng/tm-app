@@ -15,6 +15,7 @@ function BuildWindow({
   const [mousePosition, setMousePosition] = useState(null);
   const [downState, setDownState] = useState(null);
   const [overState, setOverState] = useState(null);
+  const [downTransition, setDownTransition] = useState(null);
   const [transitionFrom, setTransitionFrom] = useState(null);
   const [trigger, setTrigger] = useState(false);
 
@@ -35,7 +36,7 @@ function BuildWindow({
     if (transitions.includes((item) => item.from === s && item.to === t)) return;
     const id = nextId;
     setNextId(nextId + 1);
-    const newTransition = {id: id, from: s, to: t};
+    const newTransition = {id: id, from: s, to: t, curveX: 0, curveY: (s.x < t.x) ? -30 : 30};
     while (true) {
       let input = window.prompt('Enter new label');
       if (input == null || input === '') continue;
@@ -83,6 +84,17 @@ function BuildWindow({
     return states.find((s) => Math.sqrt(Math.pow(s.x-x, 2) + Math.pow(s.y-y, 2)) < rad);
   }
 
+  const getCurveByPosition = (x, y) => {
+    return transitions.find((t) => {
+      const fromState = states.find((s) => s.id === t.from);
+      const toState = states.find((s) => s.id === t.to);
+      if (fromState == null || toState == null) return false;
+      const distX = (toState.x - fromState.x);
+      const distY = (toState.y - fromState.y);
+      return Math.hypot((fromState.x + distX/2 + t.curveX) - x, (fromState.y + distY/2 + t.curveY) - (y)) < rad/4;
+    });
+  }
+
   const onMouseMove = (e) => {
     const { offsetX: x, offsetY: y } = e.nativeEvent;
     // console.log(`mouse move to ${x}, ${y}`);
@@ -92,6 +104,17 @@ function BuildWindow({
       downState.y = y;
       setTrigger(!trigger);
     }
+    if (downTransition != null) {
+      const fromState = states.find((s) => s.id === downTransition.from);
+      const toState = states.find((s) => s.id === downTransition.to);
+      const distX = (toState.x - fromState.x);
+      const distY = (toState.y - fromState.y);
+      downTransition.curveX = x - (fromState.x + distX/2);
+      downTransition.curveY = y - (fromState.y + distY/2);
+      console.log("dragged");
+      console.log(downTransition);
+    }
+    
     setOverState(getStateByPosition(x,y));
   };
 
@@ -100,6 +123,9 @@ function BuildWindow({
     // console.log(`mouse down at ${x}, ${y}`);
     // setMouseDown({ x, y });
     setDownState(getStateByPosition(x, y));
+    setDownTransition(getCurveByPosition(x, y));
+    console.log(downTransition);
+    console.log("tried");
     setOverState(downState);
   };
 
@@ -116,6 +142,7 @@ function BuildWindow({
         newTransition(transitionFrom.id, s.id);
     }
     setTransitionFrom(null);
+    setDownTransition(null);
   };
 
   const onBuilderDoubleClick = (e) => {
@@ -163,7 +190,7 @@ function BuildWindow({
   };
 
   return (
-    <div className='window-container'>
+    <div className='window-div'>
       <svg key='windowFrame' className='window' xmlns="http://www.w3.org/2000/svg"
       onMouseMove={onMouseMove}
       onMouseDown={onMouseDown}
@@ -171,16 +198,6 @@ function BuildWindow({
       onDoubleClick={(e) => onBuilderDoubleClick(e)}
       tabIndex='1'
       onKeyDown={(e) => onKeyDown(e)}>
-        <marker
-          id="arrow"
-          viewBox="0 0 10 10"
-          refX="5"
-          refY="5"
-          markerWidth="6"
-          markerHeight="6"
-          orient="auto-start-reverse">
-          <path d="M 0 0 L 10 5 L 0 10 z" />
-        </marker>
         <rect x='0' y='0' width='100%' height='100%' stroke='black' strokeWidth='1' fillOpacity='0'/>
         {drawTransitions}
         {drawStates}

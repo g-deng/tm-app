@@ -2,7 +2,7 @@ function TMTransition({ t, states, active, setActive, trigger, setTrigger, click
     const rad = 20;
     const strokeWidth = 3;
     
-    const onTransitionClick = (e, id) => {
+    const onTransitionClick = (e) => {
         
         e.stopPropagation();
         if (!clickable) return;
@@ -23,9 +23,9 @@ function TMTransition({ t, states, active, setActive, trigger, setTrigger, click
             t.move = matches.groups.move;
             console.log(t);
         } 
-        
+    
         setTrigger(!trigger);
-        setActive(id);
+        setActive(t.id);
         // window.alert(`clicked transition ${id}`);
     };
 
@@ -34,20 +34,54 @@ function TMTransition({ t, states, active, setActive, trigger, setTrigger, click
     if (fromState == null || toState == null) return <></>;
     const distX = (toState.x - fromState.x);
     const distY = (toState.y - fromState.y);
-    const dist = Math.sqrt(Math.pow(distX,2) + Math.pow(distY,2));
+
+    const curvePos = {x: fromState.x + distX/2 + t.curveX, y: fromState.y + distY/2 + t.curveY};
 
     return (
         <>
-            <line key={'g'+t.id} x1={fromState.x} x2={toState.x-distX*(rad+3*strokeWidth)/dist} 
-            y1={fromState.y} y2={toState.y-distY*(rad+3*strokeWidth)/dist} 
-            strokeOpacity={(active === t.id) ? '0.3' : '0'} stroke='cyan' strokeWidth={strokeWidth*3}
-            onClick={(e) => onTransitionClick(e, t.id)} />
-
-            <line key={t.id} x1={fromState.x} x2={toState.x-distX*(rad+3*strokeWidth)/dist} 
-            y1={fromState.y} y2={toState.y-distY*(rad+3*strokeWidth)/dist}  onClick={(e) => onTransitionClick(e, t.id)}
-            stroke="black" strokeWidth={strokeWidth} markerEnd="url(#arrow)"/>
-            <text className='svgText' key={'t'+t.id} x={fromState.x + distX/2} y={fromState.y+distY/2 - rad} 
-            onClick={(e) => onTransitionClick(e, t.id)}>{(t.write)? (t.read + "/" + t.write + ";" + t.move) : (t.read + ";" + t.move)}</text>
+            <marker
+                id="arrow"
+                viewBox="0 0 10 10"
+                refX={rad}
+                refY="5"
+                markerWidth="6"
+                markerHeight="6"
+                markerUnits="strokeWidth"
+                orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z"/>
+            </marker>
+            
+            <path 
+                key={'g' + t.id}
+                d={`M ${fromState.x} ${fromState.y} Q ${curvePos.x + t.curveX} ${curvePos.y + t.curveY} ${toState.x} ${toState.y}`} 
+                fillOpacity="0" 
+                strokeOpacity={(active === t.id) ? "0.3" : "0"} 
+                stroke="cyan" 
+                strokeWidth={strokeWidth*3}
+                onClick={(e) => onTransitionClick(e)}
+            />
+            
+            <path 
+                key={t.id}
+                d={`M ${fromState.x} ${fromState.y} Q ${curvePos.x + t.curveX} ${curvePos.y + t.curveY} ${toState.x} ${toState.y}`} 
+                fillOpacity="0" 
+                stroke="black"
+                strokeWidth={strokeWidth}
+                onClick={(e) => onTransitionClick(e)}
+                markerEnd="url(#arrow)"
+            />
+            
+            {(active === t.id) && 
+            <circle
+                cx={curvePos.x} 
+                cy={curvePos.y} 
+                r={rad/4} 
+                stroke="black"
+                strokeWidth={strokeWidth/2}
+                fill="white"
+            />}
+            <text className='svgText' key={'t'+t.id} x={curvePos.x + ((t.curveX >= 0) ? 30 : -30)} y={curvePos.y + ((t.curveY >= 0) ? 20 : -10)} textAnchor="middle"
+            onClick={(e) => onTransitionClick(e)}>{(t.write)? (t.read + "/" + t.write + ";" + t.move) : (t.read + ";" + t.move)}</text>
         </>
     );
 }
