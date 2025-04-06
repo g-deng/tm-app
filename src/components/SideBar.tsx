@@ -1,25 +1,24 @@
 import { useState } from 'react';
 import { AppProps } from '../App.types';
+import { UserAction } from '../types/user';
 
-function SideBar({
-    states,
-    setStates,
-    transitions,
-    setTransitions,
-    undoStack,
-    setUndoStack,
-    redoStack,
-    setRedoStack,
-    mode,
-    setMode,
-    testData,
-    setTestData,
-}: AppProps) {
+function SideBar(
+    {
+        states, setStates, transitions, setTransitions,
+        undoStack, setUndoStack, redoStack, setRedoStack,
+        mode, setMode, testData, setTestData,
+    }: AppProps
+) {
     const [status, setStatus] = useState('Testing information not entered');
     const [lastInputTape, setLastInputTape] = useState('ABA');
     const [lastMaxSteps, setLastMaxSteps] = useState(10);
 
-    const undoRedoStacker = (fromStack, setFromStack, toStack, setToStack) => {
+    const undoRedoStacker = (   
+        fromStack: UserAction[], 
+        setFromStack: React.Dispatch<React.SetStateAction<UserAction[]>>, 
+        toStack: UserAction[], 
+        setToStack: React.Dispatch<React.SetStateAction<UserAction[]>>
+    ) => {
         if (mode !== 'build') return;
         const elem = fromStack.pop();
         console.log(elem);
@@ -49,15 +48,15 @@ function SideBar({
                 elem.action = 'delete';
                 break;
             case 'edit':
-                let original;
                 if (elem.type === 'state') {
-                    original = states.find((item) => item.id === elem.item.id);
+                    const original = states.find((item) => item.id === elem.item.id);
                     setStates([
                         ...states.filter((item) => item.id !== elem.item.id),
                         elem.item,
                     ]);
+                    if (original) elem.item = original;
                 } else if (elem.type === 'transition') {
-                    original = transitions.find(
+                    const original = transitions.find(
                         (item) => item.id === elem.item.id,
                     );
                     setTransitions([
@@ -66,8 +65,8 @@ function SideBar({
                         ),
                         elem.item,
                     ]);
+                    if (original) elem.item = original;
                 }
-                elem.item = original;
                 break;
             case 'create-multiple':
                 setStates([...states, elem.state]);
@@ -101,63 +100,72 @@ function SideBar({
         undoRedoStacker(redoStack, setRedoStack, undoStack, setUndoStack);
     };
 
-    const onSubmit = (data) => {
-        setTestState({
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        const form = e.currentTarget
+        const data = form.elements as typeof form.elements & {
+            inputTape: HTMLInputElement;
+            maxSteps: HTMLInputElement;
+        }
+        setTestData({
             stateId: 0,
-            tape: data.get('input-tape').split(''),
+            tape: data.inputTape.value.split(''),
             pointer: 0,
             step: 0,
-            maxStep: data.get('max-steps'),
+            maxStep: Number(data.maxSteps.value),
         });
-        setLastInputTape(data.get('input-tape'));
-        setLastMaxSteps(data.get('max-steps'));
+        setLastInputTape(data.inputTape.value);
+        setLastMaxSteps(Number(data.maxSteps.value));
         setStatus('Testing data set');
     };
 
     const onStep = () => {
-        const c = testState.tape[testState.pointer];
+        if (testData == null) return;
+
+        const c = testData.tape[testData.pointer];
         const t = transitions.find(
-            (t) => t.from === testState.stateId && t.read.includes(c),
+            (t) => t.from === testData.stateId && t.read.includes(c),
         );
         if (t == null) {
             setStatus(
-                `Rejected at state ${testState.stateId} (no valid transition)`,
+                `Rejected at state ${testData.stateId} (no valid transition)`,
             );
             return;
         }
         if (t.write != null && t.write !== '') {
-            testState.tape[testState.pointer] = t.write;
+            testData.tape[testData.pointer] = t.write;
         }
-        let newPointer = testState.pointer;
+        let newPointer = testData.pointer;
         if (t.move === 'R') {
             newPointer += 1;
         } else {
             newPointer -= 1;
         }
 
-        setTestState({
+        setTestData({
             stateId: t.to,
-            tape: testState.tape,
+            tape: testData.tape,
             pointer: newPointer,
-            step: testState.step + 1,
-            maxStep: testState.maxStep,
+            step: testData.step + 1,
+            maxStep: testData.maxStep,
         });
         setStatus(
-            `Finished step ${testState.step} at state ${testState.stateId}`,
+            `Finished step ${testData.step} at state ${testData.stateId}`,
         );
     };
 
     const onFastForward = () => {
+        if (testData == null) return;
         console.log('start fast forward');
-        console.log(testState);
-        let pointer = testState.pointer;
-        let stateId = testState.stateId;
-        let step = testState.step;
-        for (let i = step; i < testState.maxStep; i++) {
+        console.log(testData);
+        let pointer = testData.pointer;
+        let stateId = testData.stateId;
+        let step = testData.step;
+        for (let i = step; i < testData.maxStep; i++) {
             const thisId = stateId;
-            const c = testState.tape.charAt(pointer);
+            const c = testData.tape[pointer];
             const t = transitions.find(
-                (t) => t.from === thisId && t.label.charAt(0) === c,
+                (t) => t.from === thisId && t.read.includes(c),
             );
             if (t == null) {
                 setStatus(
@@ -169,12 +177,12 @@ function SideBar({
             pointer += 1;
             step += 1;
         }
-        testState.stateId = stateId;
-        testState.pointer = pointer;
-        testState.step = step;
-        setTestState(testState);
+        testData.stateId = stateId;
+        testData.pointer = pointer;
+        testData.step = step;
+        setTestData(testData);
         console.log('done with fast forward');
-        console.log(testState);
+        console.log(testData);
     };
 
     return (
@@ -186,7 +194,7 @@ function SideBar({
                 }
                 onMouseDown={() => {
                     setMode('build');
-                    setTestState(null);
+                    setTestData(null);
                 }}
             >
                 build
@@ -215,12 +223,12 @@ function SideBar({
                 onMouseDown={() => setMode('test')}
             >
                 test
-                <form action={onSubmit}>
+                <form onSubmit={onSubmit}>
                     <label>
                         Limit steps:
                         <input
                             className="sidebar-input"
-                            name="max-steps"
+                            name="maxSteps"
                             type="integer"
                             defaultValue={lastMaxSteps}
                         />
@@ -229,7 +237,7 @@ function SideBar({
                         Input tape:
                         <input
                             className="sidebar-input"
-                            name="input-tape"
+                            name="inputTape"
                             type="string"
                             defaultValue={lastInputTape}
                         />
@@ -243,7 +251,7 @@ function SideBar({
                     className="sidebar-btn"
                     title="Step"
                     onClick={onStep}
-                    disabled={testState == null}
+                    disabled={testData == null}
                 >
                     Step
                 </button>
@@ -251,7 +259,7 @@ function SideBar({
                     className="sidebar-btn"
                     title="Fast forward"
                     onClick={onFastForward}
-                    disabled={testState == null}
+                    disabled={testData == null}
                 >
                     Fast forward
                 </button>

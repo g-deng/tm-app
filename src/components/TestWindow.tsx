@@ -11,7 +11,7 @@ function TestWindow({ states, transitions, testData, ...rest }: AppProps) {
         <TMTransition
             t={t}
             states={states}
-            active={active}
+            activeId={activeId}
             trigger={trigger}
             setTrigger={setTrigger}
         />
@@ -20,7 +20,7 @@ function TestWindow({ states, transitions, testData, ...rest }: AppProps) {
     const drawStates = states.map((s) => (
         <TMState
             s={s}
-            active={active}
+            activeId={activeId}
             trigger={trigger}
             setTrigger={setTrigger}
         />

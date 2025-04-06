@@ -1,4 +1,4 @@
-function InputOver({ x, y }) {
+function InputOver({ x, y } : {x: number; y: number}) {
     const topDist = y + 10;
     const leftDist = x + 100;
     return (

@@ -1,9 +1,15 @@
 import { StateData, TransitionData } from './elems';
 
-export interface SingleAction {
+export interface SingleTransitionAction {
     action: 'delete' | 'create' | 'edit';
-    type: 'state' | 'transition';
-    item: StateData | TransitionData;
+    type: 'transition';
+    item: TransitionData;
+}
+
+export interface SingleStateAction {
+    action: 'delete' | 'create' | 'edit';
+    type: 'state';
+    item: StateData;
 }
 
 export interface MultipleAction {
@@ -12,4 +18,4 @@ export interface MultipleAction {
     transitions: TransitionData[];
 }
 
-export type UserAction = SingleAction | MultipleAction;
+export type UserAction = SingleTransitionAction | SingleStateAction | MultipleAction;
