@@ -1,19 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import TMState from './TMState.js';
 import TMTransition from './TMTransition.js';
 import { AppProps } from '../App.types.js';
 
 function TestWindow({ states, transitions, testData, ...rest }: AppProps) {
     const [trigger, setTrigger] = useState(false);
-    const active = testData ? testData.stateId : null;
+    const [activeId, setActiveId] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (testData?.stateId) setActiveId(testData.stateId);
+        else setActiveId(null);
+    }, [testData]);
 
     const drawTransitions = transitions.map((t) => (
         <TMTransition
             t={t}
             states={states}
             activeId={activeId}
+            setActiveId={setActiveId}
             trigger={trigger}
             setTrigger={setTrigger}
+            clickable={false}
         />
     ));
 
@@ -21,8 +28,10 @@ function TestWindow({ states, transitions, testData, ...rest }: AppProps) {
         <TMState
             s={s}
             activeId={activeId}
+            setActiveId={setActiveId}
             trigger={trigger}
             setTrigger={setTrigger}
+            clickable={false}
         />
     ));
 

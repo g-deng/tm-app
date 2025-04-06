@@ -1,4 +1,14 @@
-function TMStateContext({ id, states, deleteState, setTransitionFrom }) {
+import { Dispatch, SetStateAction } from "react";
+import { StateData } from "../types/elems";
+
+interface TMStateContextProps {
+    id: number;
+    states: StateData[];
+    deleteState: (id: number) => void;
+    setTransitionFrom: Dispatch<SetStateAction<StateData | null>>;
+}
+
+function TMStateContext({ id, states, deleteState, setTransitionFrom } : TMStateContextProps) {
     const rad = 20;
 
     const s = states.find((s) => s.id === id);
