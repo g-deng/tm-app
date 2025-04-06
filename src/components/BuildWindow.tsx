@@ -218,7 +218,7 @@ function BuildWindow({
             downState.y = y;
         }
         setDownState(null);
-        
+
         if (transitionFrom != null && s != null) {
             newTransition(transitionFrom.id, s.id);
         }
@@ -256,7 +256,7 @@ function BuildWindow({
             setActiveId={setActiveId}
             trigger={trigger}
             setTrigger={setTrigger}
-            clickable="true"
+            clickable={true}
         />
     ));
 

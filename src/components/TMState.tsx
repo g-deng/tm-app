@@ -1,7 +1,18 @@
-function TMState({ s, activeId, setActiveId, trigger, setTrigger, clickable }) {
+import { StateData } from "../types/elems";
+
+interface TMStateProps {
+    s: StateData;
+    activeId: number | null;
+    setActiveId: React.Dispatch<React.SetStateAction<number|null>>;
+    trigger: boolean;
+    setTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+    clickable: boolean;
+}
+
+function TMState({ s, activeId, setActiveId, trigger, setTrigger, clickable } : TMStateProps) {
     const rad = 20;
 
-    const onStateClick = (e, id) => {
+    const onStateClick = (e: React.MouseEvent) => {
         if (!clickable) return;
 
         e.stopPropagation();
@@ -11,10 +22,10 @@ function TMState({ s, activeId, setActiveId, trigger, setTrigger, clickable }) {
             if (label !== null && label !== '') s.label = label;
         }
         setTrigger(!trigger);
-        setActive(id);
+        setActiveId(s.id);
     };
 
-    const isActive = active === s.id;
+    const isActive = activeId === s.id;
 
     return (
         <>
@@ -38,7 +49,7 @@ function TMState({ s, activeId, setActiveId, trigger, setTrigger, clickable }) {
                 cx={s.x}
                 cy={s.y}
                 r={rad}
-                onClick={(e) => onStateClick(e, s.id)}
+                onClick={onStateClick}
                 fill="gray"
                 stroke="black"
             />
@@ -48,7 +59,7 @@ function TMState({ s, activeId, setActiveId, trigger, setTrigger, clickable }) {
                 x={s.x - rad / 2}
                 y={s.y + 5}
                 textLength={rad}
-                onClick={(e) => onStateClick(e, s.id)}
+                onClick={onStateClick}
             >
                 {s.label}
             </text>
