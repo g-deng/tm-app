@@ -245,7 +245,7 @@ function BuildWindow({
             setActiveId={setActiveId}
             trigger={trigger}
             setTrigger={setTrigger}
-            clickable="true"
+            clickable={true}
         />
     ));
 

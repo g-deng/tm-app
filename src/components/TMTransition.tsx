@@ -1,45 +1,52 @@
-function TMTransition({
-    t,
-    states,
-    activeId,
-    setActiveId,
-    trigger,
-    setTrigger,
-    clickable,
-}) {
+import { StateData, TransitionData } from "../types/elems";
+
+interface TMTransitionProps {
+    t: TransitionData;
+    states: StateData[];
+    activeId: number | null;
+    setActiveId: React.Dispatch<React.SetStateAction<number|null>>;
+    trigger: boolean;
+    setTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+    clickable: boolean;
+}
+
+function TMTransition(
+    {
+        t, states, activeId, setActiveId, trigger, setTrigger, clickable
+    } : TMTransitionProps
+) {
     const rad = 20;
     const strokeWidth = 3;
 
-    const onTransitionClick = (e) => {
+    const onTransitionClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!clickable) return;
 
         if (e.ctrlKey) {
             let input = window.prompt('Enter new label');
             if (input == null || input === '') return;
-
+            
+            // check if format matches
             input = input.replace(/\s/g, '');
             const regex = new RegExp(
                 /(?<read>(?:[^,],)*[^,])(?:\/(?<write>[^,]))?;(?<move>[LR])/,
             );
             const matches = input.match(regex);
             if (
-                !regex.test(input) ||
-                !matches.groups.read ||
-                !matches.groups.move
+                matches && matches.groups &&
+                regex.test(input) &&
+                matches.groups.read &&
+                matches.groups.move
             ) {
-                window.alert("Doesn't match format: A/B;R or A,B,C/D;L or A;R");
-                return;
+                t.read = matches.groups.read.split(',');
+                t.write = matches.groups.write;
+                t.move = matches.groups.move;
             }
-            t.read = matches.groups.read.split(',');
-            t.write = matches.groups.write;
-            t.move = matches.groups.move;
             console.log(t);
         }
 
         setTrigger(!trigger);
-        setActive(t.id);
-        // window.alert(`clicked transition ${id}`);
+        setActiveId(t.id);
     };
 
     const fromState = states.find((s) => s.id === t.from);
@@ -72,7 +79,7 @@ function TMTransition({
                 key={'g' + t.id}
                 d={`M ${fromState.x} ${fromState.y} Q ${curvePos.x + t.curveX} ${curvePos.y + t.curveY} ${toState.x} ${toState.y}`}
                 fillOpacity="0"
-                strokeOpacity={active === t.id ? '0.3' : '0'}
+                strokeOpacity={activeId === t.id ? '0.3' : '0'}
                 stroke="cyan"
                 strokeWidth={strokeWidth * 3}
                 onClick={(e) => onTransitionClick(e)}
@@ -88,7 +95,7 @@ function TMTransition({
                 markerEnd="url(#arrow)"
             />
 
-            {active === t.id && (
+            {activeId === t.id && (
                 <circle
                     cx={curvePos.x}
                     cy={curvePos.y}
