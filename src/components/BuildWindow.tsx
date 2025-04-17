@@ -4,7 +4,7 @@ import TMTransition from './TMTransition.js';
 import TMStateContext from './TMStateContext.js';
 import { StateData, TransitionData } from '../types/elems.js';
 import { AppProps } from '../App.types.js';
-import { getById, euclid, closestOutOfRadius } from '../types/utils.js';
+import { getById, euclid, closestOutOfRadius } from '../utils.js';
 import { Point } from '../types/user.js';
 
 const strokeWidth = 3;
