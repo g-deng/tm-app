@@ -47,7 +47,7 @@ function App() {
     return (
         <div className="App">
             <header className="App-header">
-                <p>Turing Machine??? :o :D :p</p>
+                <p>turing machine simulator</p>
             </header>
             <div className="content-container">
                 <div className="window-container">

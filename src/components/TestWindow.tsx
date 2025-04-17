@@ -47,15 +47,6 @@ function TestWindow({ states, transitions, testData, ...rest }: AppProps) {
                 xmlns="http://www.w3.org/2000/svg"
                 onClick={onClick}
             >
-                <rect
-                    x="0"
-                    y="0"
-                    width="100%"
-                    height="100%"
-                    stroke="black"
-                    strokeWidth="1"
-                    fillOpacity="0"
-                />
                 {drawTransitions}
                 {drawStates}
             </svg>
