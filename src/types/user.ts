@@ -18,4 +18,6 @@ export interface MultipleAction {
     transitions: TransitionData[];
 }
 
+export type Point = { x: number; y: number };
+
 export type UserAction = SingleTransitionAction | SingleStateAction | MultipleAction;

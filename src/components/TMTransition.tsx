@@ -64,15 +64,15 @@ function TMTransition(
         <>
             <marker
                 id="arrow"
-                viewBox="0 0 10 10"
-                refX={rad}
-                refY="5"
+                viewBox="0 0 16 16"
+                refX={rad + 12}
+                refY="8"
                 markerWidth="6"
                 markerHeight="6"
                 markerUnits="strokeWidth"
                 orient="auto-start-reverse"
             >
-                <path d="M 0 0 L 10 5 L 0 10 z" />
+                <path d="M 0 0 L 16 8 L 0 16 z" />
             </marker>
 
             <path

@@ -4,12 +4,11 @@ import TMTransition from './TMTransition.js';
 import TMStateContext from './TMStateContext.js';
 import { StateData, TransitionData } from '../types/elems.js';
 import { AppProps } from '../App.types.js';
-import { getById, euclid } from '../utils.js';
+import { getById, euclid, closestOutOfRadius } from '../utils.js';
+import { Point } from '../types/user.js';
 
 const strokeWidth = 3;
 const rad = 20;
-
-type Position = { x: number; y: number };
 
 function BuildWindow({
     states,
@@ -23,7 +22,7 @@ function BuildWindow({
 }: AppProps) {
     const [nextId, setNextId] = useState<number>(3);
     const [activeId, setActiveId] = useState<number | null>(null);
-    const [mousePosition, setMousePosition] = useState<Position | null>(null);
+    const [mousePosition, setMousePosition] = useState<Point | null>(null);
     const [downState, setDownState] = useState<StateData | null>(null);
     const [overState, setOverState] = useState<StateData | null>(null);
     const [transitionFrom, setTransitionFrom] = useState<StateData | null>(
@@ -42,8 +41,7 @@ function BuildWindow({
 
     /* EDITING ELEMENTS */
 
-    /**
-     * Creates a new state with a unique id.
+    /** Creates a new state with a unique id.
      * @param x x-val of location in BuildWindow
      * @param y y-val of location in BuildWindow
      */
@@ -62,10 +60,9 @@ function BuildWindow({
         setRedoStack([]);
     };
 
-    /**
-     * Creates a new transition with a unique id.
-     * @param s 
-     * @param t 
+    /** Creates a new transition with a unique id.
+     * @param s id of source state
+     * @param t id of target state
      */
     const newTransition = (s: number, t: number) => {
         // Check if transition already exists
@@ -154,6 +151,8 @@ function BuildWindow({
         setActiveId(null);
     };
 
+    /* POSITION CALCULATORS */
+
     const getStateByPosition = (x: number, y: number) => {
         const out = states.find((s) => euclid(s.x, s.y, x, y) < rad);
 
@@ -178,24 +177,33 @@ function BuildWindow({
         else return null;
     };
 
+
+    /* USER INTERACTION EVENT HANDLERS */
+
     const onMouseMove = (e : React.MouseEvent) => {
         const { offsetX: x, offsetY: y } = e.nativeEvent;
         setMousePosition({ x, y });
+
+        // Drag state
         if (downState != null) {
             downState.x = x;
             downState.y = y;
             setTrigger(!trigger);
         }
+
+        // Drag transition handle
         if (downTransition != null) {
             const fromState = getById(states, downTransition.from);
             const toState = getById(states, downTransition.to);
 
             if (!fromState || !toState) return;
 
-            const distX = toState.x - fromState.x;
-            const distY = toState.y - fromState.y;
-            downTransition.curveX = x - (fromState.x + distX / 2);
-            downTransition.curveY = y - (fromState.y + distY / 2);
+            const midX = fromState.x + (toState.x - fromState.x) / 2;
+            const midY = fromState.y + (toState.y - fromState.y) / 2;
+            let pos = closestOutOfRadius({x, y}, {x:fromState.x, y:fromState.y}, rad*3);
+            if (pos.x === x && pos.y === y) pos = closestOutOfRadius({x, y}, {x:toState.x, y:toState.y}, rad*3);
+            downTransition.curveX = pos.x - midX;
+            downTransition.curveY = pos.y - midY;
             console.log('dragged');
             console.log(downTransition);
         }
