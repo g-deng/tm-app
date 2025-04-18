@@ -1,0 +1,154 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useState } from 'react';
+function SideBar({ states, setStates, transitions, setTransitions, undoStack, setUndoStack, redoStack, setRedoStack, mode, setMode, testData, setTestData, }) {
+    const [status, setStatus] = useState('Testing information not entered');
+    const [lastInputTape, setLastInputTape] = useState('ABA');
+    const [lastMaxSteps, setLastMaxSteps] = useState(10);
+    const undoRedoStacker = (fromStack, setFromStack, toStack, setToStack) => {
+        if (mode !== 'build')
+            return;
+        const elem = fromStack.pop();
+        console.log(elem);
+        if (elem == null || elem.action == null)
+            return;
+        switch (elem.action) {
+            case 'delete':
+                if (elem.type === 'state') {
+                    setStates(states.filter((item) => item.id !== elem.item.id));
+                }
+                else if (elem.type === 'transition') {
+                    setTransitions(transitions.filter((item) => item.id !== elem.item.id));
+                }
+                elem.action = 'create';
+                break;
+            case 'create':
+                if (elem.type === 'state' &&
+                    states.find((s) => s.id === elem.item.id) == null) {
+                    setStates([...states, elem.item]);
+                }
+                else if (elem.type === 'transition') {
+                    setTransitions([...transitions, elem.item]);
+                }
+                elem.action = 'delete';
+                break;
+            case 'edit':
+                if (elem.type === 'state') {
+                    const original = states.find((item) => item.id === elem.item.id);
+                    setStates([
+                        ...states.filter((item) => item.id !== elem.item.id),
+                        elem.item,
+                    ]);
+                    if (original)
+                        elem.item = original;
+                }
+                else if (elem.type === 'transition') {
+                    const original = transitions.find((item) => item.id === elem.item.id);
+                    setTransitions([
+                        ...transitions.filter((item) => item.id !== elem.item.id),
+                        elem.item,
+                    ]);
+                    if (original)
+                        elem.item = original;
+                }
+                break;
+            case 'create-multiple':
+                setStates([...states, elem.state]);
+                setTransitions([...transitions, ...elem.transitions]);
+                elem.action = 'delete-multiple';
+                break;
+            case 'delete-multiple':
+                setStates(states.filter((item) => item.id !== elem.state.id));
+                if (elem.transitions != null && elem.transitions.length > 0)
+                    setTransitions(transitions.filter((item) => elem.transitions.find((t) => t.id === item.id) != null));
+                elem.action = 'create-multiple';
+                break;
+            default:
+                break;
+        }
+        setToStack([...toStack, elem]);
+        setFromStack(fromStack);
+    };
+    const onUndo = () => {
+        undoRedoStacker(undoStack, setUndoStack, redoStack, setRedoStack);
+    };
+    const onRedo = () => {
+        undoRedoStacker(redoStack, setRedoStack, undoStack, setUndoStack);
+    };
+    const onSubmit = (e) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const data = form.elements;
+        setTestData({
+            stateId: 0,
+            tape: data.inputTape.value.split(''),
+            pointer: 0,
+            step: 0,
+            maxStep: Number(data.maxSteps.value),
+        });
+        setLastInputTape(data.inputTape.value);
+        setLastMaxSteps(Number(data.maxSteps.value));
+        setStatus('Testing data set');
+    };
+    const onStep = () => {
+        if (testData == null)
+            return;
+        const c = testData.tape[testData.pointer];
+        const t = transitions.find((t) => t.from === testData.stateId && t.read.includes(c));
+        if (t == null) {
+            setStatus(`Rejected at state ${testData.stateId} (no valid transition)`);
+            return;
+        }
+        if (t.write != null && t.write !== '') {
+            testData.tape[testData.pointer] = t.write;
+        }
+        let newPointer = testData.pointer;
+        if (t.move === 'R') {
+            newPointer += 1;
+        }
+        else {
+            newPointer -= 1;
+        }
+        setTestData({
+            stateId: t.to,
+            tape: testData.tape,
+            pointer: newPointer,
+            step: testData.step + 1,
+            maxStep: testData.maxStep,
+        });
+        setStatus(`Finished step ${testData.step} at state ${testData.stateId}`);
+    };
+    const onFastForward = () => {
+        if (testData == null)
+            return;
+        console.log('start fast forward');
+        console.log(testData);
+        let pointer = testData.pointer;
+        let stateId = testData.stateId;
+        let step = testData.step;
+        for (let i = step; i < testData.maxStep; i++) {
+            const thisId = stateId;
+            const c = testData.tape[pointer];
+            const t = transitions.find((t) => t.from === thisId && t.read.includes(c));
+            if (t == null) {
+                setStatus(`Rejected at state ${stateId} after (no valid transition)`);
+                break;
+            }
+            stateId = t.to;
+            pointer += 1;
+            step += 1;
+        }
+        testData.stateId = stateId;
+        testData.pointer = pointer;
+        testData.step = step;
+        setTestData(testData);
+        console.log('done with fast forward');
+        console.log(testData);
+    };
+    return (_jsxs("div", { className: "sidebar", children: [_jsxs("div", { className: 'sidebar-section' +
+                    (mode === 'build' ? ' sidebar-active' : ''), onMouseDown: () => {
+                    setMode('build');
+                    setTestData(null);
+                }, children: ["build", _jsx("button", { className: "sidebar-btn", title: "Undo", onClick: onUndo, disabled: undoStack.length <= 0, children: "Undo" }), _jsx("button", { className: "sidebar-btn", title: "Redo", onClick: onRedo, disabled: redoStack.length <= 0, children: "Redo" })] }), _jsxs("div", { className: 'sidebar-section' +
+                    (mode === 'test' ? ' sidebar-active' : ''), onMouseDown: () => setMode('test'), children: ["test", _jsxs("form", { onSubmit: onSubmit, children: [_jsxs("label", { children: ["Limit steps:", _jsx("input", { className: "sidebar-input", name: "maxSteps", type: "integer", defaultValue: lastMaxSteps })] }), _jsxs("label", { children: ["Input tape:", _jsx("input", { className: "sidebar-input", name: "inputTape", type: "string", defaultValue: lastInputTape })] }), _jsxs("label", { children: ["Save test params:", _jsx("input", { className: "sidebar-btn", type: "submit" })] })] }), _jsx("button", { className: "sidebar-btn", title: "Step", onClick: onStep, disabled: testData == null, children: "Step" }), _jsx("button", { className: "sidebar-btn", title: "Fast forward", onClick: onFastForward, disabled: testData == null, children: "Fast forward" }), "Status: ", status] })] }));
+}
+export default SideBar;
