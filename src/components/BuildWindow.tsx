@@ -2,6 +2,7 @@ import { useState } from 'react';
 import TMState from './TMState.js';
 import TMTransition from './TMTransition.js';
 import TMStateContext from './TMStateContext.js';
+import TMStatePopup from './TMStatePopup.js';
 import { StateData, TransitionData } from '../types/elems.js';
 import { AppProps } from '../App.types.js';
 import { getById, euclid, closestOutOfRadius } from '../utils.js';
@@ -22,15 +23,13 @@ function BuildWindow({
 }: AppProps) {
     const [nextId, setNextId] = useState<number>(3);
     const [activeId, setActiveId] = useState<number | null>(null);
+    const [contextState, setContextState] = useState<StateData | null>(null);
+    const [contextTransition, setContextTransition] = useState<TransitionData | null>(null);
     const [mousePosition, setMousePosition] = useState<Point | null>(null);
     const [downState, setDownState] = useState<StateData | null>(null);
     const [overState, setOverState] = useState<StateData | null>(null);
-    const [transitionFrom, setTransitionFrom] = useState<StateData | null>(
-        null,
-    );
-    const [downTransition, setDownTransition] = useState<TransitionData | null>(
-        null,
-    );
+    const [transitionFrom, setTransitionFrom] = useState<StateData | null>(null);
+    const [downTransition, setDownTransition] = useState<TransitionData | null>(null);
     const [trigger, setTrigger] = useState(false);
 
     const takeId = () => {
@@ -240,9 +239,9 @@ function BuildWindow({
     };
 
     const onKeyDown = (e : React.KeyboardEvent) => {
-        if (e.key === 'Delete' || e.key === 'Backspace') {
-            deleteItem(activeId);
-        }
+        // if (e.key === 'Delete' || e.key === 'Backspace') {
+        //     deleteItem(activeId);
+        // }
     };
 
     const drawTransitions = transitions.map((t) => (
@@ -312,6 +311,23 @@ function BuildWindow({
         return <></>;
     };
 
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        const { offsetX: x, offsetY: y } = e.nativeEvent;
+        const state = getStateByPosition(x, y);
+        const transition = getCurveByPosition(x, y);
+        if (state != null) {
+            setContextState(state);
+            setContextTransition(null);
+        } else if (transition != null) {
+            setContextTransition(transition);
+            setContextState(null);
+        } else {
+            setContextState(null);
+            setContextTransition(null);
+        }
+    }
+
     return (
         <div className="window-div">
             <svg
@@ -322,17 +338,42 @@ function BuildWindow({
                 onMouseDown={onMouseDown}
                 onMouseUp={onMouseUp}
                 onDoubleClick={(e) => onBuilderDoubleClick(e)}
+                onContextMenu={handleContextMenu}
                 tabIndex={1}
                 onKeyDown={(e) => onKeyDown(e)}
             >
                 {drawTransitions}
                 {drawStates}
-                {activeId !== null && (
+                {contextState !== null && (
                     <TMStateContext
-                        id={activeId}
-                        states={states}
+                        state={contextState}
                         deleteState={deleteItem}
                         setTransitionFrom={setTransitionFrom}
+                    />
+                )}
+                {activeId !== null && (
+                    <TMStatePopup
+                        initialLabel={getById(states, activeId)?.label}
+                        activeId={activeId}
+                        setActiveId={setActiveId}
+                        states={states}
+                        transitions={transitions}
+                        onLabelUpdate={(s) => {
+                            const state = getById(states, activeId);
+                            if (state) {
+                                state.label = s;
+                                setStates(states);
+                                setTrigger(!trigger);
+                            }
+                        }}
+                        onAddTransition={setTransitionFrom}
+                        onDeleteTransition={deleteItem}
+                        onDeleteState={()=>deleteItem(activeId)}
+                        onTransitionClick={(id) => {
+                            setActiveId(id);
+                            setTrigger(!trigger);
+                        }}
+                        containerWidth={400}
                     />
                 )}
                 {drawPreviewTransition()}

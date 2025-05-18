@@ -2,17 +2,15 @@ import { Dispatch, SetStateAction } from "react";
 import { StateData } from "../types/elems";
 
 interface TMStateContextProps {
-    id: number;
-    states: StateData[];
+    state: StateData;
     deleteState: (id: number) => void;
     setTransitionFrom: Dispatch<SetStateAction<StateData | null>>;
 }
 
-function TMStateContext({ id, states, deleteState, setTransitionFrom } : TMStateContextProps) {
+function TMStateContext({ state, deleteState, setTransitionFrom } : TMStateContextProps) {
     const rad = 20;
 
-    const s = states.find((s) => s.id === id);
-    if (s == null) return <></>;
+    if (state == null) return <></>;
     
     const itemHeight = 30;
     const cornerRadius = 5;
@@ -20,8 +18,8 @@ function TMStateContext({ id, states, deleteState, setTransitionFrom } : TMState
     const menuHeight = itemHeight * 3;
 
     // menu's upper left corner
-    const x = s.x + rad + 10;
-    const y = s.y - menuHeight;
+    const x = state.x + rad + 10;
+    const y = state.y - menuHeight;
 
     return (
         <g transform={`translate(${x}, ${y})`}>
@@ -57,7 +55,7 @@ function TMStateContext({ id, states, deleteState, setTransitionFrom } : TMState
         </g>
         
         {/* Add Transition */}
-        <g onClick={()=>setTransitionFrom(s)} style={{ cursor: 'pointer' }}>
+        <g onClick={()=>setTransitionFrom(state)} style={{ cursor: 'pointer' }}>
             <rect
             x={0}
             y={itemHeight}
@@ -78,7 +76,7 @@ function TMStateContext({ id, states, deleteState, setTransitionFrom } : TMState
         </g>
         
         {/* Delete */}
-        <g onClick={()=>deleteState(id)} style={{ cursor: 'pointer' }}>
+        <g onClick={()=>deleteState(state.id)} style={{ cursor: 'pointer' }}>
             <rect
             x={0}
             y={itemHeight * 2}
