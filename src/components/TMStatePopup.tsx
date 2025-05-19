@@ -1,8 +1,9 @@
 import { StateData, TransitionData } from '../types/elems';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import EditableField from './EditableField';
 
 interface TMStatePopupProps {
-    initialLabel: string | undefined;
+    initialLabel: string | null;
     activeId: number | null;
     states: StateData[];
     transitions: TransitionData[];
@@ -29,9 +30,6 @@ function TMStatePopup({
     containerWidth,
 } : TMStatePopupProps) {    
     const [label, setLabel] = useState(initialLabel);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editValue, setEditValue] = useState(initialLabel);
-    const inputRef = useRef<HTMLInputElement>(null);
     const menuWidth = 250;
     const menuHeight = 300;
     const padding = 15;
@@ -43,40 +41,21 @@ function TMStatePopup({
     // Sync internal state when initialLabel changes
     useEffect(() => {
         setLabel(initialLabel);
-        setEditValue(initialLabel);
-        setIsEditing(false);
     }, [initialLabel, activeId]);
     
-    // Focus input when editing starts
-    useEffect(() => {
-        if (isEditing && inputRef.current) {
-            inputRef.current.focus();
-        }
-    }, [isEditing]);
 
     const state = states.find((s) => s.id === activeId);
     const stateTransitions = transitions.filter((t) => t.from === activeId);
     
     if (state == null) return <></>;
-
     
-    const handleEditStart = () => {
-        setEditValue(label);
-        setIsEditing(true);
-    };
-    
-    const handleEditCancel = () => {
-        setIsEditing(false);
-    };
-    
-    const handleEditSave = () => {
+    const handleEditSave = (editValue: string) => {
         if (!editValue || editValue.trim() === '') {
             alert('Label cannot be empty');
             return;
         }
         onLabelUpdate(editValue);
         setLabel(editValue);
-        setIsEditing(false);
     };
     
     const positionX = containerWidth - menuWidth - padding;
@@ -144,81 +123,14 @@ function TMStatePopup({
                     Label:
                 </text>
                 
-                {isEditing ? (
-                    <>
-                        <foreignObject x={padding + 50} y={0} width={120} height={itemHeight}>
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                border: '1px solid #ccc',
-                                borderRadius: '4px',
-                                padding: '0 5px',
-                            }}
-                        />
-                        </foreignObject>
-                        <g onClick={handleEditSave} style={{ cursor: 'pointer' }}>
-                            <rect
-                                x={menuWidth - padding - 50}
-                                y={5}
-                                width={20}
-                                height={20}
-                                rx={4}
-                                ry={4}
-                                fill="#4CAF50"
-                            />
-                            <text
-                                x={menuWidth - padding - 40}
-                                y={itemHeight / 2}
-                                dominantBaseline="middle"
-                                textAnchor="middle"
-                                fill="#ffffff"
-                                fontSize={16}
-                            >
-                                ✓
-                            </text>
-                        </g>
-                        <g onClick={handleEditCancel} style={{ cursor: 'pointer' }}>
-                            <rect
-                                x={menuWidth - padding - 25}
-                                y={5}
-                                width={20}
-                                height={20}
-                                rx={4}
-                                ry={4}
-                                fill="#f44336"
-                            />
-                            <text
-                                x={menuWidth - padding - 15}
-                                y={itemHeight / 2}
-                                dominantBaseline="middle"
-                                textAnchor="middle"
-                                fill="#ffffff"
-                                fontSize={16}
-                            >
-                                x
-                            </text>
-                        </g>
-                    </>
-                ) : (
-                    <>
-                        <text
-                            x={padding + 50}
-                            y={itemHeight / 2}
-                            dominantBaseline="middle"
-                            fill="#333333"
-                            fontSize={16}
-                            onClick={handleEditStart}
-                            style={{ cursor: 'text' }}
-                        >
-                            {label}
-                        </text>
-                    </>
-                )}
+                <EditableField
+                    value={label || ""}
+                    onSave={handleEditSave}
+                    x = {padding + 50}
+                    y = {0}
+                    width = {menuWidth - padding * 3 - 50}
+                    height = {itemHeight}
+                />
             </g>
             
             {/* Transitions section */}

@@ -353,7 +353,7 @@ function BuildWindow({
                 )}
                 {activeId !== null && (
                     <TMStatePopup
-                        initialLabel={getById(states, activeId)?.label}
+                        initialLabel={getById(states, activeId)?.label || ""}
                         activeId={activeId}
                         setActiveId={setActiveId}
                         states={states}
