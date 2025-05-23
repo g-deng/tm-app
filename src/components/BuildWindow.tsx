@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { act, useState } from 'react';
 import TMState from './TMState.js';
 import TMTransition from './TMTransition.js';
 import TMStateContext from './TMStateContext.js';
@@ -7,6 +7,7 @@ import { StateData, TransitionData } from '../types/elems.js';
 import { AppProps } from '../App.types.js';
 import { getById, euclid, closestOutOfRadius } from '../utils.js';
 import { Point } from '../types/user.js';
+import TMTransitionPopup from './TMTransitionPopup.js';
 
 const strokeWidth = 3;
 const rad = 20;
@@ -373,6 +374,20 @@ function BuildWindow({
                             setActiveId(id);
                             setTrigger(!trigger);
                         }}
+                        containerWidth={400}
+                    />
+                )}
+                {activeId !== null && (
+                    <TMTransitionPopup
+                        activeId={activeId}
+                        setActiveId={setActiveId}
+                        states={states}
+                        transition={getById(transitions, activeId)}
+                        onUpdateTransition={(t) => {
+                            const removed = transitions.filter((item) => item.id !== activeId);
+                            setTransitions([...removed, t]);
+                        }}
+                        onDeleteTransition={deleteItem}
                         containerWidth={400}
                     />
                 )}
