@@ -1,51 +1,43 @@
 import { Dispatch, SetStateAction } from "react";
-import { StateData } from "../types/elems";
+import { TransitionData } from "../types/elems";
 
-interface TMStateContextProps {
-    contextState: {state: StateData, x: number, y: number} | null;
-    deleteState: (id: number) => void;
-    setTransitionFrom: Dispatch<SetStateAction<StateData | null>>;
+interface TMTransitionContextProps {
+    contextTransition: {x: number, y: number, transition: TransitionData} | null;
+    deleteTransition: (id: number) => void;
     setActiveId: Dispatch<SetStateAction<number | null>>;
 }
 
-function TMStateContext({ contextState, deleteState, setTransitionFrom, setActiveId } : TMStateContextProps) {
-    const rad = 20;
-
-    if (contextState == null) return <></>;
+function TMTransitionContext({ contextTransition, deleteTransition, setActiveId } : TMTransitionContextProps) {
+    if (contextTransition == null) return <></>;
     
     const itemHeight = 30;
     const cornerRadius = 5;
     const menuWidth = 120;
-    const menuHeight = itemHeight * 3;
-
-    // menu's upper left corner
-    const x = contextState.state.x + rad + 10;
-    const y = contextState.state.y - menuHeight;
+    const menuHeight = itemHeight * 2;
 
     const focus = (e: React.MouseEvent) => {
         e.stopPropagation();
     }
 
     const handleDelete = (e: React.MouseEvent) => {
-        console.log('Delete state', contextState.state);
+        console.log('Delete transition', contextTransition.transition);
         e.stopPropagation();
-        deleteState(contextState.state.id);
+        deleteTransition(contextTransition.transition.id);
     }
 
     const handleEdit = (e: React.MouseEvent) => {
-        console.log('Edit state', contextState.state);
+        console.log('Edit transition', contextTransition.transition);
         e.stopPropagation();
-        setActiveId(contextState.state.id);
+        setActiveId(contextTransition.transition.id);
     }
 
-    const handleAddTransition = (e: React.MouseEvent) => {
-        console.log('Add transition from state', contextState.state);
-        e.stopPropagation();
-        setTransitionFrom(contextState.state);
-    }
+    // menu's upper left corner
+    // const x = transition.curveX + rad + 10;
+    // const y = transition.curveY - menuHeight;
 
     return (
-        <g transform={`translate(${x}, ${y})`}
+        <g 
+            transform={`translate(${contextTransition.x}, ${contextTransition.y})`}
             onMouseDown={focus}
         >
         <rect
@@ -79,11 +71,11 @@ function TMStateContext({ contextState, deleteState, setTransitionFrom, setActiv
             </text>
         </g>
         
-        {/* Add Transition */}
-        <g onClick={handleAddTransition} style={{ cursor: 'pointer' }}>
+        {/* Delete */}
+        <g onClick={handleDelete} style={{ cursor: 'pointer' }}>
             <rect
             x={0}
-            y={itemHeight}
+            y={itemHeight * 1}
             width={menuWidth}
             height={itemHeight}
             fill="transparent"
@@ -91,27 +83,6 @@ function TMStateContext({ contextState, deleteState, setTransitionFrom, setActiv
             <text
             x={menuWidth / 2}
             y={itemHeight * 1.5}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="#333333"
-            fontSize={14}
-            >
-            Add Transition
-            </text>
-        </g>
-        
-        {/* Delete */}
-        <g onClick={handleDelete} style={{ cursor: 'pointer' }}>
-            <rect
-            x={0}
-            y={itemHeight * 2}
-            width={menuWidth}
-            height={itemHeight}
-            fill="transparent"
-            />
-            <text
-            x={menuWidth / 2}
-            y={itemHeight * 2.5}
             textAnchor="middle"
             dominantBaseline="middle"
             fill="#ff4444"
@@ -130,16 +101,8 @@ function TMStateContext({ contextState, deleteState, setTransitionFrom, setActiv
             stroke="#eeeeee"
             strokeWidth={1}
         />
-        <line
-            x1={5}
-            y1={itemHeight * 2}
-            x2={menuWidth - 5}
-            y2={itemHeight * 2}
-            stroke="#eeeeee"
-            strokeWidth={1}
-        />
         </g>
     );
 }
 
-export default TMStateContext;
+export default TMTransitionContext;

@@ -21,6 +21,7 @@ function TestWindow({ states, transitions, testData, ...rest }: AppProps) {
             trigger={trigger}
             setTrigger={setTrigger}
             clickable={false}
+            setContextTransition={() => {}}
         />
     ));
 
@@ -32,6 +33,7 @@ function TestWindow({ states, transitions, testData, ...rest }: AppProps) {
             trigger={trigger}
             setTrigger={setTrigger}
             clickable={false}
+            setContextState={() => {}}
         />
     ));
 

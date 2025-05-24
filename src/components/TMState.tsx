@@ -7,9 +7,10 @@ interface TMStateProps {
     trigger: boolean;
     setTrigger: React.Dispatch<React.SetStateAction<boolean>>;
     clickable: boolean;
+    setContextState: (s: {state: StateData, x: number, y: number}) => void;
 }
 
-function TMState({ s, activeId, setActiveId, trigger, setTrigger, clickable } : TMStateProps) {
+function TMState({ s, activeId, setActiveId, trigger, setTrigger, clickable, setContextState } : TMStateProps) {
     const rad = 20;
 
     const onStateClick = (e: React.MouseEvent) => {
@@ -25,10 +26,24 @@ function TMState({ s, activeId, setActiveId, trigger, setTrigger, clickable } : 
         setActiveId(s.id);
     };
 
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (!clickable) return;
+        const { offsetX: x, offsetY: y } = e.nativeEvent;
+        setContextState({state: s, x, y});
+        setTrigger(!trigger);
+        console.log('Context menu from state', s, x, y);
+    }
+
     const isActive = activeId === s.id;
 
     return (
-        <>
+        <g 
+            onClick={onStateClick}
+            onContextMenu={handleContextMenu}
+            style={{ cursor: 'pointer' }}
+        >
             <defs>
                 <radialGradient id="myGradient">
                     <stop offset="0%" stopColor="cyan" stopOpacity="1" />
@@ -49,7 +64,6 @@ function TMState({ s, activeId, setActiveId, trigger, setTrigger, clickable } : 
                 cx={s.x}
                 cy={s.y}
                 r={rad}
-                onClick={onStateClick}
                 fill="gray"
                 stroke="black"
             />
@@ -59,11 +73,10 @@ function TMState({ s, activeId, setActiveId, trigger, setTrigger, clickable } : 
                 x={s.x - rad / 2}
                 y={s.y + 5}
                 textLength={rad}
-                onClick={onStateClick}
             >
                 {s.label}
             </text>
-        </>
+        </g>
     );
 }
 

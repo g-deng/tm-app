@@ -8,11 +8,12 @@ interface TMTransitionProps {
     trigger: boolean;
     setTrigger: React.Dispatch<React.SetStateAction<boolean>>;
     clickable: boolean;
+    setContextTransition: (t: {transition: TransitionData, x: number, y: number}) => void;
 }
 
 function TMTransition(
     {
-        t, states, activeId, setActiveId, trigger, setTrigger, clickable
+        t, states, activeId, setActiveId, trigger, setTrigger, clickable, setContextTransition
     } : TMTransitionProps
 ) {
     const rad = 20;
@@ -43,11 +44,21 @@ function TMTransition(
                 t.move = matches.groups.move;
             }
             console.log(t);
-        }
+        } 
 
         setTrigger(!trigger);
         setActiveId(t.id);
     };
+
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (!clickable) return;
+        const { offsetX: x, offsetY: y } = e.nativeEvent;
+        setContextTransition({transition: t, x, y});
+        setTrigger(!trigger);
+        console.log('Context menu from transition', t, x, y);
+    }
 
     const fromState = states.find((s) => s.id === t.from);
     const toState = states.find((s) => s.id === t.to);
@@ -61,7 +72,11 @@ function TMTransition(
     };
 
     return (
-        <>
+        <g
+            onClick={onTransitionClick}
+            onContextMenu={handleContextMenu}
+            style={{ cursor: 'pointer' }}
+        >
             <marker
                 id="arrow"
                 viewBox="0 0 16 16"
@@ -82,7 +97,6 @@ function TMTransition(
                 strokeOpacity={activeId === t.id ? '0.3' : '0'}
                 stroke="cyan"
                 strokeWidth={strokeWidth * 3}
-                onClick={(e) => onTransitionClick(e)}
             />
 
             <path
@@ -91,7 +105,6 @@ function TMTransition(
                 fillOpacity="0"
                 stroke="black"
                 strokeWidth={strokeWidth}
-                onClick={(e) => onTransitionClick(e)}
                 markerEnd="url(#arrow)"
             />
 
@@ -111,13 +124,12 @@ function TMTransition(
                 x={curvePos.x + (t.curveX >= 0 ? 30 : -30)}
                 y={curvePos.y + (t.curveY >= 0 ? 20 : -10)}
                 textAnchor="middle"
-                onClick={(e) => onTransitionClick(e)}
             >
                 {t.write
                     ? t.read + '/' + t.write + ';' + t.move
                     : t.read + ';' + t.move}
             </text>
-        </>
+        </ g>
     );
 }
 

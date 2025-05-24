@@ -1,4 +1,4 @@
-import { act, useState } from 'react';
+import { useState } from 'react';
 import TMState from './TMState.js';
 import TMTransition from './TMTransition.js';
 import TMStateContext from './TMStateContext.js';
@@ -8,6 +8,7 @@ import { AppProps } from '../App.types.js';
 import { getById, euclid, closestOutOfRadius } from '../utils.js';
 import { Point } from '../types/user.js';
 import TMTransitionPopup from './TMTransitionPopup.js';
+import TMTransitionContext from './TMTransitionContext.js';
 
 const strokeWidth = 3;
 const rad = 20;
@@ -24,8 +25,8 @@ function BuildWindow({
 }: AppProps) {
     const [nextId, setNextId] = useState<number>(3);
     const [activeId, setActiveId] = useState<number | null>(null);
-    const [contextState, setContextState] = useState<StateData | null>(null);
-    const [contextTransition, setContextTransition] = useState<TransitionData | null>(null);
+    const [contextState, setContextState] = useState<{state: StateData, x: number, y: number} | null>(null);
+    const [contextTransition, setContextTransition] = useState<{transition: TransitionData, x: number, y: number} | null>(null);
     const [mousePosition, setMousePosition] = useState<Point | null>(null);
     const [downState, setDownState] = useState<StateData | null>(null);
     const [overState, setOverState] = useState<StateData | null>(null);
@@ -140,15 +141,19 @@ function BuildWindow({
                     transitions: removedTransitions,
                 },
             ]);
+            if (contextState?.state.id === id) setContextState(null);
         } else if (t != null) {
             setTransitions(transitions.filter((item) => item.id !== id));
             setUndoStack([
                 ...undoStack,
                 { action: 'create', type: 'transition', item: t },
             ]);
+            console.log(transitions);
+            if (contextTransition?.transition.id === id) setContextTransition(null);
         }
         setRedoStack([]);
         setActiveId(null);
+        setTrigger(!trigger);
     };
 
     /* POSITION CALCULATORS */
@@ -216,6 +221,8 @@ function BuildWindow({
         setDownState(getStateByPosition(x, y));
         setDownTransition(getCurveByPosition(x, y));
         setOverState(downState);
+        setContextState(null);
+        setContextTransition(null);
     };
 
     const onMouseUp = (e: React.MouseEvent) => {
@@ -254,6 +261,7 @@ function BuildWindow({
             trigger={trigger}
             setTrigger={setTrigger}
             clickable={true}
+            setContextTransition={setContextTransition}
         />
     ));
 
@@ -265,6 +273,7 @@ function BuildWindow({
             trigger={trigger}
             setTrigger={setTrigger}
             clickable={true}
+            setContextState={setContextState}
         />
     ));
 
@@ -312,23 +321,6 @@ function BuildWindow({
         return <></>;
     };
 
-    const handleContextMenu = (e: React.MouseEvent) => {
-        e.preventDefault();
-        const { offsetX: x, offsetY: y } = e.nativeEvent;
-        const state = getStateByPosition(x, y);
-        const transition = getCurveByPosition(x, y);
-        if (state != null) {
-            setContextState(state);
-            setContextTransition(null);
-        } else if (transition != null) {
-            setContextTransition(transition);
-            setContextState(null);
-        } else {
-            setContextState(null);
-            setContextTransition(null);
-        }
-    }
-
     return (
         <div className="window-div">
             <svg
@@ -339,7 +331,6 @@ function BuildWindow({
                 onMouseDown={onMouseDown}
                 onMouseUp={onMouseUp}
                 onDoubleClick={(e) => onBuilderDoubleClick(e)}
-                onContextMenu={handleContextMenu}
                 tabIndex={1}
                 onKeyDown={(e) => onKeyDown(e)}
             >
@@ -347,9 +338,17 @@ function BuildWindow({
                 {drawStates}
                 {contextState !== null && (
                     <TMStateContext
-                        state={contextState}
+                        contextState={contextState}
                         deleteState={deleteItem}
                         setTransitionFrom={setTransitionFrom}
+                        setActiveId={setActiveId}
+                    />
+                )}
+                {contextTransition !== null && (
+                    <TMTransitionContext
+                        contextTransition={contextTransition}
+                        deleteTransition={deleteItem}
+                        setActiveId={setActiveId}
                     />
                 )}
                 {activeId !== null && (
