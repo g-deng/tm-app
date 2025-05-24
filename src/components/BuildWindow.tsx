@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import TMState from './TMState.js';
 import TMTransition from './TMTransition.js';
 import TMStateContext from './TMStateContext.js';
@@ -33,6 +33,10 @@ function BuildWindow({
     const [transitionFrom, setTransitionFrom] = useState<StateData | null>(null);
     const [downTransition, setDownTransition] = useState<TransitionData | null>(null);
     const [trigger, setTrigger] = useState(false);
+
+    const [translate, setTranslate] = useState<Point>({x:0, y:0});
+    const [panStart, setPanStart] = useState<Point | null>(null);
+    const [zoom, setZoom] = useState(1);
 
     const takeId = () => {
         const id = nextId;
@@ -186,7 +190,11 @@ function BuildWindow({
     /* USER INTERACTION EVENT HANDLERS */
 
     const onMouseMove = (e : React.MouseEvent) => {
-        const { offsetX: x, offsetY: y } = e.nativeEvent;
+        const { offsetX, offsetY } = e.nativeEvent;
+
+        const x = offsetX - translate.x;
+        const y = offsetY - translate.y;
+
         setMousePosition({ x, y });
 
         // Drag state
@@ -214,19 +222,36 @@ function BuildWindow({
         }
 
         setOverState(getStateByPosition(x, y));
+
+        if (panStart != null) {
+            const dx = offsetX - panStart.x;
+            const dy = offsetY - panStart.y;
+            setTranslate({x: translate.x + dx, y: translate.y + dy});
+            setPanStart({x: offsetX, y: offsetY});
+        }
     };
 
     const onMouseDown = (e: React.MouseEvent) => {
-        const { offsetX: x, offsetY: y } = e.nativeEvent;
+        const { offsetX, offsetY } = e.nativeEvent;
+        const x = offsetX - translate.x;
+        const y = offsetY - translate.y;
+
         setDownState(getStateByPosition(x, y));
         setDownTransition(getCurveByPosition(x, y));
         setOverState(downState);
         setContextState(null);
         setContextTransition(null);
+
+        if (e.shiftKey) {
+            setPanStart({ x: offsetX, y: offsetY });
+        }
     };
 
     const onMouseUp = (e: React.MouseEvent) => {
-        const { offsetX: x, offsetY: y } = e.nativeEvent;
+        const { offsetX, offsetY } = e.nativeEvent;
+        const x = offsetX - translate.x;
+        const y = offsetY - translate.y;
+
         const s = getStateByPosition(x, y);
         if (downState != null) {
             downState.x = x;
@@ -239,10 +264,17 @@ function BuildWindow({
         }
         setTransitionFrom(null);
         setDownTransition(null);
+
+        if (panStart != null) {
+            setPanStart(null);
+        }
     };
 
     const onBuilderDoubleClick = (e : React.MouseEvent) => {
-        const { offsetX: x, offsetY: y } = e.nativeEvent;
+        const { offsetX, offsetY } = e.nativeEvent;
+        const x = offsetX - translate.x;
+        const y = offsetY - translate.y;
+
         if (getStateByPosition(x, y) == null) newState(x, y);
     };
 
@@ -251,6 +283,53 @@ function BuildWindow({
         //     deleteItem(activeId);
         // }
     };
+
+    // const onWheel = (e: React.WheelEvent) => {
+    //     const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    //     const newZoom = Math.max(0.1, Math.min(2, zoom + delta));
+    //     setZoom(newZoom);
+    // }
+
+    const svgRef = useRef<SVGSVGElement | null>(null);
+
+    useEffect(() => {
+        const svg = svgRef.current;
+        if (!svg) return;
+
+        const handleWheel = (e: WheelEvent) => {
+            e.preventDefault();
+
+            const svgRect = svg.getBoundingClientRect();
+
+            const cursorX = e.clientX - svgRect.left;
+            const cursorY = e.clientY - svgRect.top;
+
+            // Convert cursor from screen -> SVG coords
+            const svgX = (cursorX - translate.x) / zoom;
+            const svgY = (cursorY - translate.y) / zoom;
+
+            // Zoom factor
+            const zoomIntensity = 0.001;
+            const rawFactor = 1 - e.deltaY * zoomIntensity;
+            const scaleFactor = Math.min(Math.max(rawFactor, 0.8), 1.2);
+
+            setZoom(zoom => {
+                const newScale = Math.max(0.01, Math.min(10, zoom * scaleFactor));
+
+                // Compute new translation to keep point under cursor fixed
+                const newTranslateX = cursorX - svgX * newScale;
+                const newTranslateY = cursorY - svgY * newScale;
+
+                setTranslate({ x: newTranslateX, y: newTranslateY });
+                return newScale;
+            });
+        };
+
+        svg.addEventListener('wheel', handleWheel, { passive: false });
+        return () => svg.removeEventListener('wheel', handleWheel);
+    }, [zoom, translate]);
+
+
 
     const drawTransitions = transitions.map((t) => (
         <TMTransition
@@ -326,6 +405,7 @@ function BuildWindow({
     return (
         <div className="window-div">
             <svg
+                ref={svgRef}
                 key="windowFrame"
                 className="window"
                 xmlns="http://www.w3.org/2000/svg"
@@ -335,6 +415,7 @@ function BuildWindow({
                 onDoubleClick={(e) => onBuilderDoubleClick(e)}
                 tabIndex={1}
                 onKeyDown={(e) => onKeyDown(e)}
+                preserveAspectRatio="none"
             >
                 <defs>
                     <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
@@ -342,66 +423,67 @@ function BuildWindow({
                     </pattern>
                 </defs>
 
-                
-                <rect width="100%" height="100%" fill="url(#grid)" />
-
-                {drawTransitions}
-                {drawStates}
-                {contextState !== null && (
-                    <TMStateContext
-                        contextState={contextState}
-                        deleteState={deleteItem}
-                        setTransitionFrom={setTransitionFrom}
-                        setActiveId={setActiveId}
-                    />
-                )}
-                {contextTransition !== null && (
-                    <TMTransitionContext
-                        contextTransition={contextTransition}
-                        deleteTransition={deleteItem}
-                        setActiveId={setActiveId}
-                    />
-                )}
-                {activeId !== null && (
-                    <TMStatePopup
-                        initialLabel={getById(states, activeId)?.label || ""}
-                        activeId={activeId}
-                        setActiveId={setActiveId}
-                        states={states}
-                        transitions={transitions}
-                        onLabelUpdate={(s) => {
-                            const state = getById(states, activeId);
-                            if (state) {
-                                state.label = s;
-                                setStates(states);
+                {<g key="content" transform={`translate(${translate.x}, ${translate.y}) scale(${zoom})`}>
+                    <rect x="-50000" y="-50000" width="100000" height="100000" fill="url(#grid)" />
+                    {drawTransitions}
+                    {drawStates}
+                    {contextState !== null && (
+                        <TMStateContext
+                            contextState={contextState}
+                            deleteState={deleteItem}
+                            setTransitionFrom={setTransitionFrom}
+                            setActiveId={setActiveId}
+                        />
+                    )}
+                    {contextTransition !== null && (
+                        <TMTransitionContext
+                            contextTransition={contextTransition}
+                            deleteTransition={deleteItem}
+                            setActiveId={setActiveId}
+                        />
+                    )}
+                    {activeId !== null && (
+                        <TMStatePopup
+                            initialLabel={getById(states, activeId)?.label || ""}
+                            activeId={activeId}
+                            setActiveId={setActiveId}
+                            states={states}
+                            transitions={transitions}
+                            onLabelUpdate={(s) => {
+                                const state = getById(states, activeId);
+                                if (state) {
+                                    state.label = s;
+                                    setStates(states);
+                                    setTrigger(!trigger);
+                                }
+                            }}
+                            onAddTransition={setTransitionFrom}
+                            onDeleteTransition={deleteItem}
+                            onDeleteState={()=>deleteItem(activeId)}
+                            onTransitionClick={(id) => {
+                                setActiveId(id);
                                 setTrigger(!trigger);
-                            }
-                        }}
-                        onAddTransition={setTransitionFrom}
-                        onDeleteTransition={deleteItem}
-                        onDeleteState={()=>deleteItem(activeId)}
-                        onTransitionClick={(id) => {
-                            setActiveId(id);
-                            setTrigger(!trigger);
-                        }}
-                        containerWidth={400}
-                    />
-                )}
-                {activeId !== null && (
-                    <TMTransitionPopup
-                        activeId={activeId}
-                        setActiveId={setActiveId}
-                        states={states}
-                        transition={getById(transitions, activeId)}
-                        onUpdateTransition={(t) => {
-                            const removed = transitions.filter((item) => item.id !== activeId);
-                            setTransitions([...removed, t]);
-                        }}
-                        onDeleteTransition={deleteItem}
-                        containerWidth={400}
-                    />
-                )}
-                {drawPreviewTransition()}
+                            }}
+                            containerWidth={400}
+                        />
+                    )}
+                    {activeId !== null && (
+                        <TMTransitionPopup
+                            activeId={activeId}
+                            setActiveId={setActiveId}
+                            states={states}
+                            transition={getById(transitions, activeId)}
+                            onUpdateTransition={(t) => {
+                                const removed = transitions.filter((item) => item.id !== activeId);
+                                setTransitions([...removed, t]);
+                            }}
+                            onDeleteTransition={deleteItem}
+                            containerWidth={400}
+                        />
+                    )}
+                    {drawPreviewTransition()}
+
+                </g>}
             </svg>
         </div>
     );
