@@ -254,6 +254,7 @@ function BuildWindow({
 
     const drawTransitions = transitions.map((t) => (
         <TMTransition
+            key={t.id}
             t={t}
             states={states}
             activeId={activeId}
@@ -267,6 +268,7 @@ function BuildWindow({
 
     const drawStates = states.map((s) => (
         <TMState
+            key={s.id}
             s={s}
             activeId={activeId}
             setActiveId={setActiveId}

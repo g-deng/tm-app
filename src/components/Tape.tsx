@@ -41,9 +41,8 @@ function Tape({
         <div className="tape-container" ref={tapeRef}>
             <svg width={Math.max(numChars * cellSize, 500)} height="60px">
                 {tapeArray.map((c, i) => (
-                    <g>
+                    <g key={i}>
                         <rect
-                            key={i}
                             x={i * cellSize}
                             y="10"
                             width="48"

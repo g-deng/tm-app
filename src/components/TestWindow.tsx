@@ -14,6 +14,7 @@ function TestWindow({ states, transitions, testData, ...rest }: AppProps) {
 
     const drawTransitions = transitions.map((t) => (
         <TMTransition
+            key={t.id}
             t={t}
             states={states}
             activeId={activeId}
@@ -27,6 +28,7 @@ function TestWindow({ states, transitions, testData, ...rest }: AppProps) {
 
     const drawStates = states.map((s) => (
         <TMState
+            key={s.id}
             s={s}
             activeId={activeId}
             setActiveId={setActiveId}

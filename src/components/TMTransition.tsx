@@ -91,7 +91,6 @@ function TMTransition(
             </marker>
 
             <path
-                key={'g' + t.id}
                 d={`M ${fromState.x} ${fromState.y} Q ${curvePos.x + t.curveX} ${curvePos.y + t.curveY} ${toState.x} ${toState.y}`}
                 fillOpacity="0"
                 strokeOpacity={activeId === t.id ? '0.3' : '0'}
@@ -100,7 +99,6 @@ function TMTransition(
             />
 
             <path
-                key={t.id}
                 d={`M ${fromState.x} ${fromState.y} Q ${curvePos.x + t.curveX} ${curvePos.y + t.curveY} ${toState.x} ${toState.y}`}
                 fillOpacity="0"
                 stroke="black"
@@ -120,7 +118,6 @@ function TMTransition(
             )}
             <text
                 className="svgText"
-                key={'t' + t.id}
                 x={curvePos.x + (t.curveX >= 0 ? 30 : -30)}
                 y={curvePos.y + (t.curveY >= 0 ? 20 : -10)}
                 textAnchor="middle"
