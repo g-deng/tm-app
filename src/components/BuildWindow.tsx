@@ -336,6 +336,15 @@ function BuildWindow({
                 tabIndex={1}
                 onKeyDown={(e) => onKeyDown(e)}
             >
+                <defs>
+                    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#aaaaaa" strokeWidth="1" />
+                    </pattern>
+                </defs>
+
+                
+                <rect width="100%" height="100%" fill="url(#grid)" />
+
                 {drawTransitions}
                 {drawStates}
                 {contextState !== null && (
