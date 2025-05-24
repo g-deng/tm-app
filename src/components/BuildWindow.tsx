@@ -192,8 +192,8 @@ function BuildWindow({
     const onMouseMove = (e : React.MouseEvent) => {
         const { offsetX, offsetY } = e.nativeEvent;
 
-        const x = offsetX - translate.x;
-        const y = offsetY - translate.y;
+        const x = (offsetX - translate.x) / zoom;
+        const y = (offsetY - translate.y) / zoom;
 
         setMousePosition({ x, y });
 
@@ -233,14 +233,16 @@ function BuildWindow({
 
     const onMouseDown = (e: React.MouseEvent) => {
         const { offsetX, offsetY } = e.nativeEvent;
-        const x = offsetX - translate.x;
-        const y = offsetY - translate.y;
+        const x = (offsetX - translate.x) / zoom;
+        const y = (offsetY - translate.y) / zoom;
 
         setDownState(getStateByPosition(x, y));
         setDownTransition(getCurveByPosition(x, y));
         setOverState(downState);
         setContextState(null);
         setContextTransition(null);
+
+        console.log('mousedown', downState, downTransition);
 
         if (e.shiftKey) {
             setPanStart({ x: offsetX, y: offsetY });
@@ -249,8 +251,8 @@ function BuildWindow({
 
     const onMouseUp = (e: React.MouseEvent) => {
         const { offsetX, offsetY } = e.nativeEvent;
-        const x = offsetX - translate.x;
-        const y = offsetY - translate.y;
+        const x = (offsetX - translate.x) / zoom;
+        const y = (offsetY - translate.y) / zoom;
 
         const s = getStateByPosition(x, y);
         if (downState != null) {
@@ -272,8 +274,8 @@ function BuildWindow({
 
     const onBuilderDoubleClick = (e : React.MouseEvent) => {
         const { offsetX, offsetY } = e.nativeEvent;
-        const x = offsetX - translate.x;
-        const y = offsetY - translate.y;
+        const x = (offsetX - translate.x) / zoom;
+        const y = (offsetY - translate.y) / zoom;
 
         if (getStateByPosition(x, y) == null) newState(x, y);
     };
